@@ -24,6 +24,11 @@ sudo apt-get install -y tree
 # sudo dpkg -i ripgrep_11.0.1_amd64.deb
 sudo apt-get install -y ripgrep
 
+# espanso
+sudo snap install espanso --classic
+sudo ln -sf ~/.config/espanso/default.yml
+ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/default.yml
+
 # docker
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update -y
