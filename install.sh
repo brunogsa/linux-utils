@@ -26,8 +26,8 @@ sudo apt-get install -y ripgrep
 
 # espanso
 sudo snap install espanso --classic
-sudo ln -sf ~/.config/espanso/default.yml
 ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/default.yml
+espanso restart
 
 # docker
 sudo apt-get remove docker docker-engine docker.io containerd runc

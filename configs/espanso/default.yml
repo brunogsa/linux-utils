@@ -11,6 +11,9 @@ matches:
   - trigger: ":espanso"
     replace: "Hi there, espanso is working!"
 
+  - trigger: ":shrug"
+    replace: "¯\\_(ツ)_/¯"
+
   - trigger: ":jira-epic"
     replace: "*Objetivo:* \n\n X \n\n *TODO:* \n\n - X \n\n *Dúvidas:* \n\n - X \n\n *Referências:* \n\n - X"
 
