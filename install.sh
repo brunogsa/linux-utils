@@ -29,6 +29,9 @@ sudo snap install espanso --classic
 ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/default.yml
 espanso restart
 
+# kazam
+sudo apt-get install -y kazam
+
 # docker
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update -y
