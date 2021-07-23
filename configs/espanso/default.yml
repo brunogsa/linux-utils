@@ -7,9 +7,11 @@
 # Matches are the substitution rules, when you type the "trigger" string
 # it gets replaced by the "replace" string.
 matches:
-  # Simple text replacement
-  - trigger: ":espanso"
-    replace: "Hi there, espanso is working!"
+  - trigger: ":pr-suggestion"
+    replace: "**Sugestão Opcional:**\n\nX$|$\n\n> Pode resolver essa thread quando preferir!"
+
+  - trigger: ":pr-compliment"
+    replace: "**Elogio:**\n\nX$|$\n\n> Pode resolver essa thread depois de ler!"
 
   - trigger: ":shrug"
     replace: "¯\\_(ツ)_/¯"
