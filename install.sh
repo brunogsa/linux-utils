@@ -8,6 +8,13 @@ sudo add-apt-repository ppa:hluk/copyq
 sudo apt update
 sudo apt install -y copyq
 
+# ngrok
+# Docs: https://ngrok.com/docs
+wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+unzip ngrok-stable-linux-amd64.zip
+sudo mv ngrok /usr/bin/
+rm *zip
+
 # peek
 sudo add-apt-repository ppa:peek-developers/stable
 sudo apt update
