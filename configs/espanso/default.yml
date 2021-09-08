@@ -29,7 +29,7 @@ matches:
     replace: "*O que queremos?* \n\n- X \n\n *TODO:* \n\n- X \n\n *Timebox máximo:* \n\n X dias. \n\n *Output:* \n\n- Decisão tomada \n- Doc no Confluence ou repo \n- Apresentação ao time \n- Cards no Jira para endereçar os próximos passos \n\n *Dúvidas:* \n\n- X \n\n *Referências:* \n\n- X"
 
   - trigger: ":jira-debt"
-    replace: "*Impacto:* \n\n Por não arrumarmos X, sofreremos Y. \n\n *TODO:* \n\n- X \n\n *Critérios de Aceite:* \n\n- Testes automatizados \n- Storybook \n- Documentação do repo (APIs e Arquitetura) atualizadas, se necessário \n- Infraestrutura como Código \n- Deploy para staging e production \n\n *Dúvidas:* \n\n- X \n\n *Referências:* \n\n- X"
+    replace: "*Impacto:* \n\n Criticidade: X n\n Resumo: Por não arrumarmos X, sofreremos Y. \n\n\ Insira um texto com detalhes não-técnicos aqui! \n\n *TODO:* \n\n- X \n\n *Critérios de Aceite:* \n\n- Testes automatizados \n- Storybook \n- Documentação do repo (APIs e Arquitetura) atualizadas, se necessário \n- Infraestrutura como Código \n- Deploy para staging e production \n\n *Dúvidas:* \n\n- X \n\n *Referências:* \n\n- X"
 
   - trigger: ":jira-bug"
     replace: "*Descrição:* \n\n O problema X está acontecendo. \n\n *Passos p/ Reproduzir:* \n\n- X \n\n *Critérios de Aceite:* \n\n - Testes automatizados, ao menos para cobrir o bug \n - Storybook \n- Documentação do repo (APIs e Arquitetura) atualizadas, se necessário \n- Infraestrutura como Código \n- Deploy para staging e production \n\n *Dúvidas:* \n\n- X \n\n *Referências:* \n\n- X"
