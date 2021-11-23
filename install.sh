@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# git
-sudo apt-get install -y git
+sudo apt update
+sudo apt-get install -y git meld tree htop ripgrep kazam
 
 # copyq
 sudo add-apt-repository ppa:hluk/copyq
@@ -20,24 +20,10 @@ sudo add-apt-repository ppa:peek-developers/stable
 sudo apt update
 sudo apt install -y peek
 
-# meld
-sudo apt-get install -y meld
-
-# tree
-sudo apt-get install -y tree
-
-# rg
-# curl -LO https://github.com/BurntSushi/ripgrep/releases/download/11.0.1/ripgrep_11.0.1_amd64.deb
-# sudo dpkg -i ripgrep_11.0.1_amd64.deb
-sudo apt-get install -y ripgrep
-
 # espanso
 sudo snap install espanso --classic
 ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/default.yml
 espanso restart
-
-# kazam
-sudo apt-get install -y kazam
 
 # docker
 sudo apt-get remove docker docker-engine docker.io containerd runc
