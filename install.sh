@@ -1,7 +1,7 @@
 #!/bin/bash
 
 sudo apt update
-sudo apt-get install -y git meld tree htop ripgrep kazam
+sudo apt-get install -y git meld tree htop ripgrep kazam tldr
 
 # copyq
 sudo add-apt-repository ppa:hluk/copyq
