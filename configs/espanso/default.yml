@@ -41,3 +41,7 @@ matches:
 
   - trigger: ":jira-bug"
     replace: "**DESCRIÇÃO:** \n\nO problema X está acontecendo. \n\n**PASSOS P/ REPRODUZIR:** \n\n- X$|$ \n\n**CRITÉRIOS DE ACEITE:** \n\n- Logs (com level, timestamp, traceId etc) \n- Testes automatizados, ao menos para cobrir o bug \n- Storybook \n- Documentação do repo (APIs e Arquitetura) atualizadas, se necessário \n- Infraestrutura como Código \n- Deploy para staging e production \n\n**DÚVIDAS:** \n\n- X \n\n**REFERÊNCIAS:** \n\n- X"
+
+
+  - trigger: "mmd-header"
+    replace: "%%{init: {'sequence': {'showSequenceNumbers': true} }}%%"
