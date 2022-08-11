@@ -23,6 +23,7 @@ sudo apt install -y peek
 # espanso
 sudo snap install espanso --classic
 ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/config/default.yml
+ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/match/base.yml
 espanso restart
 
 # docker
