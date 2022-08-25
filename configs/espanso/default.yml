@@ -251,13 +251,10 @@ matches:
       
       - X
 
-  - trigger: ":mmd-header"
-    replace: "%%{init: {'sequence': {'showSequenceNumbers': true} }}%%"
-
   - trigger: ":mmd-sequence"
     replace: |-
       sequenceDiagram
-        participant t as TO
-        participant d as DO
+        autonumber
+        participant t as TODO
 
-        t->>d: X
+        t->>t: X
