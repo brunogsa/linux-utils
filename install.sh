@@ -1,56 +1,57 @@
 #!/bin/bash
 
-sudo apt update
-sudo apt-get install -y git meld tree htop ripgrep kazam tldr
+# Install Brew for Mac
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew update
+
+brew install git
+brew install wget
+brew install tree
+brew install htop
+brew install ripgrep
+brew install meld
+brew install tldr
+brew install gimp
+
+# No kazam for macOS, using an alternativa called OBS Studio
+# brew install --cask obsbrew install kazam
+# Install when necessary:
+# brew install --cask obs
 
 # copyq
-sudo add-apt-repository ppa:hluk/copyq
-sudo apt update
-sudo apt install -y copyq
+brew install --cask copyq
 
 # ngrok
 # Docs: https://ngrok.com/docs
-wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-unzip ngrok-stable-linux-amd64.zip
-sudo mv ngrok /usr/bin/
-rm *zip
+# Too dangerous, generally. Not installing but leaving here as documentation
 
-# peek
-sudo add-apt-repository ppa:peek-developers/stable
-sudo apt update
-sudo apt install -y peek
+# No peek for macOS, using an alternative called kap
+brew install --cask kap
 
 # espanso
-sudo snap install espanso --classic
-ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/config/default.yml
-ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/match/base.yml
+brew tap espanso/espanso
+brew install espanso
+ln -sf ~/linux-utils/configs/espanso/default.yml ~/Library/Application\ Support/espanso/config/default.yml
+ln -sf ~/linux-utils/configs/espanso/default.yml ~/Library/Application\ Support/espanso/match/base.yml
 espanso restart
 
-# docker
-sudo apt-get remove docker docker-engine docker.io containerd runc
-sudo apt-get update -y
-sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo apt-key fingerprint 0EBFCD88
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-sudo groupadd docker
-sudo usermod -aG docker $USER
-newgrp docker
-
-# docker-compose
-sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-sudo ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+# docker and docker-compose
+cd ~/Downloads
+wget https://desktop.docker.com/mac/main/amd64/Docker.dmg
+sudo hdiutil attach Docker.dmg
+cd -
+sudo /Volumes/Docker/Docker.app/Contents/MacOS/install --accept-license
+sudo hdiutil detach /Volumes/Docker
+echo "[WARN] docker and docker-compose installation will be finished after starting docker for the first time via Finder"
 
 # aws cli
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-rm -fr awscliv2.zip aws
+cd ~/Downloads
+curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+sudo installer -pkg AWSCLIV2.pkg -target /
+cd -
 
 # terraform
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt-get update && sudo apt-get install -y terraform
+# I probably won't need it, so commenting it out
+
+echo "Done!!"
