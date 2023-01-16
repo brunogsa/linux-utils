@@ -54,4 +54,7 @@ cd -
 # terraform
 # I probably won't need it, so commenting it out
 
+# iterm2, instead of gnome-terminal
+brew install iterm2
+
 echo "Done!!"
