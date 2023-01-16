@@ -10,26 +10,39 @@ matches:
   - trigger: ":shrug"
     replace: "¯\\_(ツ)_/¯"
 
-  - trigger: ":meet"
-    replace: "https://meet.google.com/ena-qpcg-ius?authuser=1"
-
-  - trigger: ":pr-suggestion"
+  - trigger: ":br-pr-suggestion"
     replace: |-
-      **Sugestão Opcional:**
+      **Sugestão opcional:**
       
       X$|$
       
-      > Pode resolver essa thread quando preferir!
+      > Pode resolve esta thread depois de ler
 
-  - trigger: ":pr-compliment"
+  - trigger: ":br-pr-compliment"
     replace: |-
       **Elogio:**
       
       X$|$
       
-      > Pode resolver essa thread depois de ler!
+      > Pode resolve esta thread depois de ler
 
-  - trigger: ":jira-epic"
+  - trigger: ":en-pr-suggestion"
+    replace: |-
+      **Optional suggestion:**
+      
+      X$|$
+      
+      > You can resolve this thread after reading it
+
+  - trigger: ":en-pr-compliment"
+    replace: |-
+      **Compliment:**
+      
+      X$|$
+      
+      > You can resolve this thread after reading it
+
+  - trigger: ":br-jira-epic"
     replace: |-
       **PARA ATINGIR:** 
       
@@ -55,7 +68,33 @@ matches:
       
       - X
 
-  - trigger: ":jira-story"
+  - trigger: ":en-jira-epic"
+    replace: |-
+      **TO ACHIEVE:** 
+      
+      - X$|$ 
+      
+      **WILL BE DELIVERED:** 
+      
+      - X 
+      
+      **ACCEPTANCE CRITERIA:** 
+      
+      Functionals: 
+      - X 
+      
+      Non-functionals: 
+      - X 
+      
+      **QUESTIONS:** 
+      
+      - X 
+      
+      **REFERENCES:** 
+      
+      - X
+
+  - trigger: ":br-jira-story"
     replace: |-
       Eu, como X, quero conseguir Y para Z. 
       
@@ -75,7 +114,27 @@ matches:
       
       - X
 
-  - trigger: ":jira-spike"
+  - trigger: ":en-jira-story"
+    replace: |-
+      I, as a X, want to Y for Z. 
+      
+      **ACCEPTANCE CRITERIA:** 
+      
+      Funcionals: 
+      - X 
+      
+      Non-funcionals: 
+      - X 
+      
+      **QUESTIONS:** 
+      
+      - X 
+      
+      **REFERENCES:** 
+      
+      - X
+
+  - trigger: ":br-jira-spike"
     replace: |-
       **O QUE QUEREMOS?** 
       
@@ -114,7 +173,46 @@ matches:
       
       - X
 
-  - trigger: ":jira-task"
+  - trigger: ":en-jira-spike"
+    replace: |-
+      **WHAT DO WE WANT?** 
+      
+      - X$|$ 
+      
+      **WHY DO WE WANT?** 
+      
+      - X 
+      
+      **ACCEPTANCE CRITERIA:** 
+      
+      Functionals: 
+      - X 
+      
+      Non-functionals: 
+      - X 
+      
+      **MAXIMUM TIMEBOX:** 
+      
+      X days. 
+
+      Passed this time, we suggest closing the spike with the findings until now. Then, define the next steps together with the team to continue the investigation in a next spike.
+      
+      **OUTPUT:** 
+      
+      - Decision made
+      - Doc in Confluence or repo
+      - Presentation to team
+      - Cards on Jira to address the next steps
+      
+      **QUESTIONS:** 
+      
+      - X 
+      
+      **REFERENCES:** 
+      
+      - X
+
+  - trigger: ":br-jira-task"
     replace: |-
       **CRITÉRIOS DE ACEITE:** 
       
@@ -137,7 +235,30 @@ matches:
       
       - X
 
-  - trigger: ":jira-improvement"
+  - trigger: ":en-jira-task"
+    replace: |-
+      **ACCEPTANCE CRITERIA:** 
+      
+      Funcionals: 
+      - X 
+      
+      Non-funcional: 
+      - Logs (with level, timestamp, traceId etc) 
+      - Automated tests
+      - Storybook 
+      - Updated doc on repo (APIs and Architecture), if necessary
+      - Infrastructure as Code
+      - Deploy to staging and production 
+      
+      **QUESTIONS:** 
+      
+      - X 
+      
+      **REFERENCES:** 
+      
+      - X
+
+  - trigger: ":br-jira-improvement"
     replace: |-
       **RELEVÂNCIA**: 
       
@@ -179,19 +300,59 @@ matches:
       
       - X
 
-  - trigger: ":jira-debt"
+  - trigger: ":en-jira-improvement"
+    replace: |-
+      **RELEVANCE**: 
+      
+      1/4 -> Low gain, high effort: probably shouldn't be done, unless nothing more relevant is pending. 
+      
+      2/4 -> High gain, high effort: it should eventually be prioritized, if innovation is an important aspect in the team. If possible, slice this improvement into 'low gain, low effort' micro-improvements to increase the chances of this improvement being implemented.
+      
+      3/4 -> Low gain, low effort: can be prioritized to complete sprints, as long as there are no outstanding bugs or delays (that can be prioritized).
+      
+      4/4 -> High gain, low effort: it should be prioritized as soon as possible, even if there are bugs or pending debts, since it will increase (by a lot) the efficiency of a process or solution with a low effort.
+      
+      **RESUME:** 
+      
+      Describe the pain points and why it's necessary.
+      
+      **IMPACT:**
+      
+      After adjusting it, we expect the following gains:
+      - X 
+      
+      **ACCEPTANCE CRITERIA:** 
+      
+      Funcionals: 
+      - X 
+      
+      Non-funcional: 
+      - Logs (with level, timestamp, traceId etc) 
+      - Automated tests
+      - Storybook 
+      - Updated doc on repo (APIs and Architecture), if necessary
+      - Infrastructure as Code
+      - Deploy to staging and production 
+      
+      **QUESTIONS:** 
+      
+      - X 
+      
+      **REFERENCES:** 
+      
+      - X
+
+  - trigger: ":br-jira-debt"
     replace: |-
       **CRITICIDADE**: 
-      
-      1/5 -> Não crítico: não é uma melhoria, pois já deveria ter sido feito, mas precisa ser ajustado para manter o código limpo e fácil de ser extendido. 
-      
-      2/5 -> Criticidade baixa: pode ser priorizado depois de uma release importante ou MVP, mas deveria ser priorizado antes da próxima entrega acontecer. 
-      
-      3/5 -> Criticidade média: até pode esperar uma release importante ou entrega do MVP, mas vai custar bem mais caro ajustá-lo depois disso. 
-      
-      4/5 -> Crítico: não pode esperar a release ou entrega do MVP acontecer, ou vamos nos arrepender amargamente por isso. 
-      
-      5/5 -> Muito crítico: não é um incidente, mas pode se tornar um em breve, ou; uma bola de neve incontrolável de retrabalho, se não ajustado o quanto antes. 
+
+      1/4 -> Criticidade baixa, alto esforço: não é uma melhoria, pois já deveria ter sido feito, mas precisa ser ajustado para manter o código limpo e fácil de ser extendido. Se possível, fatie este débito em micro-débitos de 'baixo risco, baixo esforço' para aumentar as chances desse débito ser endereçado.
+
+      2/4 -> Criticidade baixa, baixo esforço: pode ser priorizado depois de uma release importante ou MVP, mas deveria ser priorizado antes da próxima entrega acontecer.
+
+      3/4 -> Criticidade alta, alto esforço: não é um incidente, mas pode se tornar um em breve, ou; uma bola de neve incontrolável de retrabalho, se não ajustado o quanto antes. Não pode esperar a release our entrega do MVP acontecer. Crie um épico para essa iniciativa e seja incisivo com business para priorizá-lo assim que possível.
+
+      4/4 -> Criticidade alta, baixo esforço: não é um incidente, mas pode se tornar um em breve, ou; uma bola de neve incontrolável de retrabalho, se não ajustado o quanto antes. Priorize assim que possível.
       
       **RESUMO:** 
       
@@ -224,7 +385,50 @@ matches:
       
       - X
 
-  - trigger: ":jira-bug"
+  - trigger: ":en-jira-debt"
+    replace: |-
+      **RISK**: 
+
+      1/4 -> Low risk, high effort: not an improvement as it already should have been done, but need to be done to keep the code clean and easy to extend. If possible, slice this debt into 'low risk, low effort' micro-debts to increase the chances of this debt being addressed.
+
+      2/4 -> Low risk, low effort: can be prioritized after a major release or MVP, but should be prioritized before the next release happens.
+
+      3/4 -> High risk, high effort: Not an incident, but could become one soon, or; an uncontrollable snowball of rework if not fixed as soon as possible. Can't wait for the MVP release or delivery to happen. Create an epic for this initiative and be aggressive with business to prioritize it as soon as possible.
+
+      4/4 -> High risk, low effort: Not an incident, but could become one soon, or; an uncontrollable snowball of rework if not fixed as soon as possible. Prioritize as soon as possible.
+
+      **SUMMARY:**
+
+      By not fixing X, we will suffer Y.
+
+      Insert text with non-technical details here!
+
+      **IMPACT:**
+
+      X
+
+      **ACCEPTANCE CRITERIA:**
+
+      Functionals:
+      - X
+
+      Non-functionals:
+      - Logs (with level, timestamp, traceId etc)
+      - Automated tests
+      - Storybook
+      - Updated repo documentation (APIs and Architecture) if needed
+      - Infrastructure as Code
+      - Deploy for staging and production
+
+      **QUESTIONS:**
+
+      - X
+
+      **REFERENCES:**
+
+      - X
+
+  - trigger: ":br-jira-bug"
     replace: |-
       **DESCRIÇÃO:** 
       
@@ -251,10 +455,29 @@ matches:
       
       - X
 
-  - trigger: ":mmd-sequence"
+  - trigger: ":en-jira-bug"
     replace: |-
-      sequenceDiagram
-        autonumber
-        participant t as TODO
+      **PROBLEM DESCRIPTION:** 
+      
+      Problem X is happening.
+      
+      **STEPS TO REPRODUCE:** 
+      
+      - X$|$ 
+      
+      **ACCEPTANCE CRITERIA:** 
+      
+      - Logs (with level, timestamp, traceId etc) 
+      - Automated tests, at least for covering the bug
+      - Storybook
+      - Updated repo documentation (APIs and Architecture) if needed
+      - Infrastructure as Code
+      - Deploy for staging and production
 
-        t->>t: X
+      **QUESTIONS:**
+
+      - X
+
+      **REFERENCES:**
+
+      - X
