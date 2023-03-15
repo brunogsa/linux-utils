@@ -14,12 +14,16 @@ brew install meld
 brew install tldr
 brew install gimp
 
+# CPU/RAM/Disc/Network monitor on tray
+brew install stats
+
 # No kazam for macOS, using an alternativa called OBS Studio
 # brew install --cask obsbrew install kazam
 # Install when necessary:
 # brew install --cask obs
 
 # copyq
+# System Preferences -> Security & Privacy -> General (tab) -> You should see a warning that CopyQ was blocked, override it here and you should be good
 brew install --cask copyq
 
 # ngrok
