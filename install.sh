@@ -62,4 +62,7 @@ cd -
 # iterm2, instead of gnome-terminal
 brew install iterm2
 
+# Converts json to json schema
+npm install -g json-schema-generator
+
 echo "Done!!"
