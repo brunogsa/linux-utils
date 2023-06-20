@@ -12,11 +12,11 @@ matches:
 
   - trigger: ":br-pr-suggestion"
     replace: |-
+      > Pode resolver esta thread depois de ler. Fique a vontade de faze-la ou não!
+
       **Sugestão opcional:**
       
       X$|$
-      
-      > Pode resolve esta thread depois de ler
 
   - trigger: ":br-pr-compliment"
     replace: |-
@@ -28,11 +28,11 @@ matches:
 
   - trigger: ":en-pr-suggestion"
     replace: |-
+      > You can resolve this thread after reading it. Feel free to do it or not!
+
       **Optional suggestion:**
       
       X$|$
-      
-      > You can resolve this thread after reading it
 
   - trigger: ":en-pr-compliment"
     replace: |-
