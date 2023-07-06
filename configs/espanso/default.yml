@@ -10,6 +10,12 @@ matches:
   - trigger: ":shrug"
     replace: "¯\\_(ツ)_/¯"
 
+  - trigger: ":code"
+    replace: |-
+      ```
+      $|$
+      ```
+
   - trigger: ":br-pr-suggestion"
     replace: |-
       > Pode resolver esta thread depois de ler. Fique a vontade de faze-la ou não!
