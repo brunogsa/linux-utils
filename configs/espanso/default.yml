@@ -487,3 +487,46 @@ matches:
       **REFERENCES:**
 
       - X
+
+  - trigger: ":en-use-case"
+    replace: |-
+      **Title:** UC1 - Place an order
+      **Actor:** Buyer
+
+      **Preconditions:**
+      1. User is logged
+      2. X
+
+      **Flow of Events:**
+      1. The customer browses the product catalog.
+      2. The customer adds desired products to the shopping cart.
+      3. The customer proceeds to checkout.
+      4. The customer enters shipping information.
+      5. The customer selects a payment method and completes payment.
+      6. The system confirms the order and provides an order number.
+      7. X
+
+      **Postconditions:**
+      1. Order is placed and visible to user
+      2. X
+
+  - trigger: ":en-test-case"
+    replace: |-
+      **Title:** UC1.TC1 - Verify Order Placement
+      **Actor:** Buyer
+
+      **Description:**
+      Verify that a customer can successfully place an order.
+
+      **Preconditions:**
+      1. User is logged
+      2. X
+
+      **Test Steps:**
+      1. Customer click on header "XPTO"
+      2. Customer checks a paragraph containing "XPTO" existsd
+      3. X
+
+      **Postconditions:**
+      1. Order is placed and visible to user
+      2. X
