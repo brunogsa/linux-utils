@@ -14,6 +14,7 @@ brew install ripgrep
 brew install meld
 brew install tldr
 brew install gimp
+brew install imagemagick
 
 # CPU/RAM/Disc/Network monitor on tray
 brew install stats
