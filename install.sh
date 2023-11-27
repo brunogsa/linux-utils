@@ -40,6 +40,10 @@ brew tap espanso/espanso
 brew install espanso
 ln -sf ~/linux-utils/configs/espanso/default.yml ~/Library/Application\ Support/espanso/config/default.yml
 ln -sf ~/linux-utils/configs/espanso/default.yml ~/Library/Application\ Support/espanso/match/base.yml
+mkdir -p ~/.config/espanso
+ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/config/default.yml
+ln -sf ~/linux-utils/configs/espanso/default.yml ~/.config/espanso/match/base.yml
+
 espanso restart
 
 # docker and docker-compose
