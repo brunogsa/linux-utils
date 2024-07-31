@@ -16,6 +16,28 @@ matches:
       $|$
       ```
 
+  - trigger: ":adr"
+    replace: |-
+      Número do ADR: 001
+      Título: X
+      Data: 2023-08-13
+      Status: Aceito
+
+      Contexto
+      X
+
+      Decisão
+      X
+
+      Justificativa
+      X
+
+      Alternativas Consideradas
+      X
+
+      Referências
+      X
+
   - trigger: ":br-pr-suggestion"
     replace: |-
       > Pode resolver esta thread depois de ler. Fique a vontade de faze-la ou não!
