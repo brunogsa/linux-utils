@@ -2,6 +2,9 @@
 
 sudo apt update
 sudo apt-get install -y git meld tree htop ripgrep kazam tldr
+git config --global user.email "brunogsa.92@gmail.com"
+git config --global user.name "Bruno G. Salomao Agostini"
+git config --global core.editor "vi"
 
 # copyq
 sudo add-apt-repository ppa:hluk/copyq
