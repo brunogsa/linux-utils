@@ -10,13 +10,67 @@ matches:
   - trigger: ":shrug"
     replace: "¯\\_(ツ)_/¯"
 
+  - trigger: ":code"
+    replace: |-
+      ```
+      $|$
+      ```
+
+  - trigger: ":br-adr"
+    replace: |-
+      Owner: TODO
+      Status: TODO.
+
+      # Contexto
+
+      TODO
+
+      # Decisão
+
+      TODO
+
+      # Justificativa
+
+      TODO
+
+      # Alternativas Consideradas
+
+      [+] → vantagens
+      [-] → desvantagens
+
+      ## A.) X
+
+      TODO
+
+      ## B.) Y
+
+      TODO
+
+      # Consequências
+
+      TODO
+
+      # Reviewers
+
+      ## Mandatórios
+
+      TODO
+
+      ## Opcionais
+
+      TODO
+
+      # Referências
+      1. [Guia sobre ADR](https://medium.com/@jhonywalkeer/guia-completo-sobre-architecture-decision-records-adr-defini%C3%A7%C3%A3o-e-melhores-pr%C3%A1ticas-f63e66d33e6)
+      2. [What is an ADR](https://github.com/joelparkerhenderson/architecture-decision-record/tree/main?tab=readme-ov-file#what-is-an-architecture-decision-record)
+
   - trigger: ":br-pr-suggestion"
     replace: |-
+      > Pode resolver esta thread depois de ler. Fique a vontade de faze-la ou não!
+
       **Sugestão opcional:**
       
       X$|$
-      
-      > Pode resolve esta thread depois de ler
 
   - trigger: ":br-pr-compliment"
     replace: |-
@@ -28,11 +82,11 @@ matches:
 
   - trigger: ":en-pr-suggestion"
     replace: |-
+      > You can resolve this thread after reading it. Feel free to do it or not!
+
       **Optional suggestion:**
       
       X$|$
-      
-      > You can resolve this thread after reading it
 
   - trigger: ":en-pr-compliment"
     replace: |-
@@ -481,3 +535,46 @@ matches:
       **REFERENCES:**
 
       - X
+
+  - trigger: ":en-use-case"
+    replace: |-
+      **Title:** UC1 - Place an order
+      **Actor:** Buyer
+
+      **Preconditions:**
+      1. User is logged
+      2. X
+
+      **Flow of Events:**
+      1. The customer browses the product catalog.
+      2. The customer adds desired products to the shopping cart.
+      3. The customer proceeds to checkout.
+      4. The customer enters shipping information.
+      5. The customer selects a payment method and completes payment.
+      6. The system confirms the order and provides an order number.
+      7. X
+
+      **Postconditions:**
+      1. Order is placed and visible to user
+      2. X
+
+  - trigger: ":en-test-case"
+    replace: |-
+      **Title:** UC1.TC1 - Verify Order Placement
+      **Actor:** Buyer
+
+      **Description:**
+      Verify that a customer can successfully place an order.
+
+      **Preconditions:**
+      1. User is logged
+      2. X
+
+      **Test Steps:**
+      1. Customer click on header "XPTO"
+      2. Customer checks a paragraph containing "XPTO" existsd
+      3. X
+
+      **Postconditions:**
+      1. Order is placed and visible to user
+      2. X
