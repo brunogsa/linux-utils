@@ -57,3 +57,6 @@ rm -fr awscliv2.zip aws
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 sudo apt-get update && sudo apt-get install -y terraform
+
+# xubuntu hotkeys
+ln -sf ./configs/xubuntu/xfce4-keyboard-shortcuts.xml ~/.config/xfce4/xfconf/xfce-perchannel-xml/
