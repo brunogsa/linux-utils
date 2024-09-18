@@ -74,5 +74,6 @@ npm install -g json-schema-generator
 brew install pipx
 pipx install aider-chat
 pipx ensurepath
+echo "Now set its OPENAPI KEY: export OPENAI_API_KEY=your-key-goes-here"
 
 echo "Done!!"
