@@ -70,4 +70,9 @@ brew install iterm2
 # Converts json to json schema
 npm install -g json-schema-generator
 
+# Aider AI
+brew install pipx
+pipx install aider-chat
+pipx ensurepath
+
 echo "Done!!"
