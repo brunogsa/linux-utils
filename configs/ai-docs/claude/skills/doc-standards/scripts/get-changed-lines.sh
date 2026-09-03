@@ -61,8 +61,8 @@ command -v git >/dev/null 2>&1 || {
 # cwd - a caller `cd`'d into one repo while pointing at a file
 # that lives in a different one must still see that other repo's
 # git state, not its own.
-file_dir=$(cd "$(dirname "$file")" && pwd -P)
-abs_file="$file_dir/$(basename "$file")"
+file_dir=$(cd "$(dirname -- "$file")" && pwd -P)
+abs_file="$file_dir/$(basename -- "$file")"
 
 git -C "$file_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
   echo "get-changed-lines.sh: not inside a git work tree" >&2
@@ -81,7 +81,9 @@ cd "$repo_root"
 
 untracked=$(git ls-files --others --exclude-standard -- "$rel_file" 2>/dev/null || true)
 if [ -n "$untracked" ]; then
-  awk '{ print NR }' "$rel_file"
+  # `./` prefix, not `--`, guards a dash-leading rel_file - BSD
+  # awk (macOS) reads `--` itself as a filename, failing there.
+  awk '{ print NR }' "./$rel_file"
   exit 0
 fi
 

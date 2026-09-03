@@ -144,6 +144,30 @@ printf 'one\ntwo\nthree\nfour\n' > "$repo_b/mod.txt"
 out=$(cd "$repo_a" && "$SCRIPT" "$repo_b/mod.txt")
 assert_eq "file in a different repo than the invoker's cwd still resolves against its own repo" "4" "$out"
 
+# --- Case 10: tracked, modified, dash-leading bare filename ->
+# dirname/basename must not parse it as an option.
+#
+# Regression test for the bug where a bare relative filename
+# starting with `-` (no directory component) got parsed as an
+# option by `dirname`/`basename` instead of as a path.
+repo=$(new_repo repo10)
+printf 'one\ntwo\nthree\n' > "$repo/-dashfile.md"
+git -C "$repo" add -- -dashfile.md
+git -C "$repo" commit -q -m base
+printf 'one\ntwo\nthree\nfour\n' > "$repo/-dashfile.md"
+out=$(cd "$repo" && "$SCRIPT" -dashfile.md)
+rc=$?
+assert_eq "tracked modified dash-leading filename reports appended line" "4" "$out"
+assert_eq "tracked modified dash-leading filename exits 0" "0" "$rc"
+
+# --- Case 11: untracked, dash-leading bare filename -> every
+# line counts as changed. Exercises the awk site on the
+# untracked branch, where `--` does not work on BSD awk.
+repo=$(new_repo repo11)
+printf 'one\ntwo\nthree\n' > "$repo/-dashfile.md"
+out=$(cd "$repo" && "$SCRIPT" -dashfile.md)
+assert_eq "untracked dash-leading filename reports every line" "$(printf '1\n2\n3')" "$out"
+
 echo
 echo "$pass_count passed, $fail_count failed"
 [ "$fail_count" -eq 0 ]

@@ -466,20 +466,15 @@ it_should_treat_a_leading_dash_filename_as_a_path_not_a_flag() {
   # and the checker's --changed-only git lookup resolve it
   # there.
 
-  # get-changed-lines.sh (a shared, out-of-scope dependency
-  # every --changed-only checker calls) has its own
-  # pre-existing dirname/basename bug on a bare leading-dash
-  # name.
+  # get-changed-lines.sh (a shared dependency every
+  # --changed-only checker calls) used to crash on a bare
+  # leading-dash name via a dirname/basename option-parsing bug,
+  # forcing this hook to fail open with no signal.
 
-  # So the checker itself errors out here (rc 2) regardless of
-  # this hook's fix - the hook's own fail-open contract already
-  # treats that as "no signal".
-
-  # What this hook owns, and what this test pins, is that its
-  # OWN basename call (line ~63) never leaks that
-  # option-parsing garbage onto its stderr while still failing
-  # open cleanly.
-  local dir long_line before after orig_pwd
+  # Now fixed, so the checker runs for real and this test pins
+  # the same exit-2/pointer-line/no-rewrite contract the
+  # spaced-path and injected-command cases already pin.
+  local dir long_line before after orig_pwd pointer_line cmd rc
   dir=$(new_repo_fixture)
   long_line=$(python3 -c "print('word ' * 120)")
   : > "$dir/-danger.md"
@@ -491,11 +486,30 @@ it_should_treat_a_leading_dash_filename_as_a_path_not_a_flag() {
   cd "$dir" || return
   run_hook "Write" "-danger.md"
   cd "$orig_pwd" || return
-  assert_eq "should fail open on a leading-dash filename (its own basename call must never crash)" "0" "$HOOK_EXIT"
-  assert_eq "should fail open silently, never leaking a basename/dirname option-parsing error" "" "$HOOK_OUT"
+  assert_eq "should exit 2 over the threshold with a leading-dash filename" "2" "$HOOK_EXIT"
+
+  pointer_line=$(printf '%s\n' "$HOOK_OUT" | grep 'check-density.sh' | head -1)
+  if [ -z "$pointer_line" ]; then
+    fail_count=$((fail_count + 1))
+    printf 'not ok - should print a check-density.sh pointer line for a leading-dash filename\n  actual:   %s\n' "$HOOK_OUT"
+    return
+  fi
+  pass_count=$((pass_count + 1))
+  printf 'ok - should print a check-density.sh pointer line for a leading-dash filename\n'
+
+  cmd=$(printf '%s' "$pointer_line" | sed -e 's/^[[:space:]]*//')
+  ( cd "$dir" && eval "$cmd" > /dev/null 2>&1 )
+  rc=$?
+  if [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ]; then
+    pass_count=$((pass_count + 1))
+    printf 'ok - printed command for a leading-dash filename runs and exits 0 or 1, never 2\n'
+  else
+    fail_count=$((fail_count + 1))
+    printf 'not ok - printed command for a leading-dash filename runs and exits 0 or 1, never 2\n  actual exit: %s\n' "$rc"
+  fi
 
   after=$(cat "$dir/-danger.md")
-  assert_eq "the checker must never rewrite the file while parsing its own leading-dash name" "$before" "$after"
+  assert_eq "the checker must never rewrite the file while checking its leading-dash name" "$before" "$after"
 }
 
 it_should_stay_silent_on_a_clean_markdown_write
