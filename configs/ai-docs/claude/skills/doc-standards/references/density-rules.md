@@ -1,8 +1,9 @@
 # Density rules — caps & rewrite patterns
 
-The rule (verbatim from CLAUDE.md `DOC` section):
+The rule — two caps, not one, because hard-wrapping is forbidden here: one paragraph is one physical line, so the per-line cap IS the per-paragraph cap, and a prose paragraph (1-4 sentences) is allowed more room than a bullet (1-2 sentences):
 
-- Every prose line, bullet, and sub-bullet stays **≤256 chars or ≤32 words**.
+- Prose lines stay **≤512 chars or ≤64 words**.
+- Bullets and sub-bullets stay **≤256 chars or ≤32 words**.
 - Over the cap → split into more (shorter) paragraphs *or* convert to bullets+sub-bullets.
 - Never drop information.
 
@@ -28,7 +29,7 @@ Char/word measurement strips `(https://…)` URL portions and remaining `[`/`]` 
 
 ### Dense paragraph → bullets + sub-bullets
 
-Bad — 470 chars / 60 words in one breath:
+Bad — 470 chars / 60 words in one breath (under the 512/64 prose cap, but still unreadable — density is about scannability, not just the cap):
 
 ```markdown
 DBMA-841 (BFF) introduces a new procedure `getSchoolsAgreementsAndSkus` (sibling of `errorCallbacks.*`) that returns the active agreements per school (one per brand via `getMostRecentContractPerBrand`) and their SKUs, allowing the front-end to filter agreements and SKUs through `errorCallbacks.{list,summary}` in passthrough mode (still accepts CNPJ as a parameter for backward compatibility), and adds a guard preventing multi-entity passthrough on the same request.
@@ -64,7 +65,7 @@ Good — split the rationale:
 ## Exceptions (single connective sentence between bulleted blocks)
 
 - A short prose sentence connecting two bulleted blocks is fine — often clearer than forcing it into a bullet.
-- Keep that sentence ≤256 chars / ≤32 words.
+- Keep that sentence ≤256 chars / ≤32 words — the tighter bullet cap, not the prose cap, because a single connective sentence should read as light as the bullets it joins.
 - The script flags any line over the cap regardless of role; resolve those by splitting, not by exception.
 
 Example — acceptable connective sentence:

@@ -13,10 +13,10 @@ costing the reader the same 60 words.
 DETECTION ONLY - do not add a --fix pass.
 
 check-bullet-gap.py has one, so the absence here reads like an omission. It is
-not. The mechanical fix for a hard wrap is joining the lines, and a join
-produces exactly the over-cap lines check-density.sh exists to reject: joining
-references/rename-list.md's 147 lines down to 131 turns a clean density run
-into four hits (370, 289, 292 and 257 chars against a 256-char cap).
+not. The mechanical fix for a hard wrap is joining the lines, and a naive join
+can produce a line over check-density.sh's cap: several short wrapped lines
+concatenate into one long paragraph line with no regard for where the cap
+falls.
 
 A --fix whose output fails a sibling checker is a broken tool. The rule's own
 remedy is "over the cap, split on a sentence boundary - never drop info to
@@ -112,9 +112,10 @@ def is_continuable_prose(line):
     deliberately. check-density.sh skips only frontmatter and fenced code, so
     an INDENTED code block is prose to it and unjoinable here.
 
-    That divergence is safe because density only flags lines OVER a 256-char
-    cap, which indented code lines do not reach - the blind spot is inert on
-    density's side, while joining an indented block here destroys the code.
+    That divergence is safe because density only flags prose lines OVER a
+    512-char cap, which indented code lines do not reach - the blind spot is
+    inert on density's side, while joining an indented block here destroys
+    the code.
     """
     if not line.strip():
         return False

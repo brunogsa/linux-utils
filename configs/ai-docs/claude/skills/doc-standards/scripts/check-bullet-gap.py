@@ -9,9 +9,9 @@ against the bullet starting the next group:
 
   sub-bullet   the line is a bullet DEEPER than the bullet on the next line,
                i.e. a nested block ending flush against its parent's sibling.
-  over-80pct   the line is a bullet over 80% of the density cap (205 chars /
-               26 words) and the next line is a bullet at the SAME or a
-               SHALLOWER indent.
+  over-80pct   the line is a bullet over 80% of the bullet density cap (205
+               chars / 26 words) and the next line is a bullet at the SAME
+               or a SHALLOWER indent.
 
 A bullet followed by its own DEEPER child never fires: the [Why] behind the
 rule asks for a stopping point "between groups", and a parent plus its
@@ -58,7 +58,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 CHANGED_LINES_SCRIPT = SCRIPT_DIR / "get-changed-lines.sh"
 
-# Defaults mirror check-density.sh's caps; this script gates at 80% of them.
+# Defaults mirror check-density.sh's bullet cap only (not the prose cap);
+# this script gates at 80% of it since it only ever measures bullets.
 MAX_CHARS = 256
 MAX_WORDS = 32
 GAP_RATIO = 0.8
