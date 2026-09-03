@@ -1,6 +1,6 @@
 ---
 name: personal-format
-description: "Applies personal comment and markdown standards to files the session wrote or edited (.md, .ts, .js, .sh, .py), or when the user asks to format or clean up comments or markdown. No Stop hook enforces these standards today, so this is the only pass that applies them."
+description: "Applies personal comment and markdown standards to files the session wrote or edited (.md, .ts, .js, .sh, .py), or when asked to format or clean up comments or markdown. No Stop hook enforces this, so it is the only pass that applies them."
 user-invocable: true
 ---
 
