@@ -148,8 +148,11 @@ it_should_use_the_counts_regime_over_the_threshold() {
     pass_count=$((pass_count + 1))
     printf 'ok - should not print any L<digits> line-number row over threshold\n'
   fi
+  # The pointer command must resolve when run as printed, so it
+  # carries the real file_path (defect 1), never the bare basename
+  # the header shows.
   assert_contains "should list the checker's own script pointer over threshold" \
-    "check-density.sh   --changed-only big.md" "$HOOK_OUT"
+    "check-density.sh   --changed-only $dir/big.md" "$HOOK_OUT"
 }
 
 it_should_use_the_line_number_regime_under_the_threshold() {
@@ -244,6 +247,92 @@ it_should_carry_the_rule_block_verbatim_in_every_report() {
   assert_contains "over-threshold report should carry rule line 3 verbatim" "$rule3" "$HOOK_OUT"
 }
 
+it_should_run_the_printed_pointer_command_for_a_nested_file() {
+  local dir long_line pointer_line
+  dir=$(new_repo_fixture)
+  mkdir -p "$dir/subdir"
+  long_line=$(python3 -c "print('word ' * 120)")
+  : > "$dir/subdir/big.md"
+  for ((i = 0; i < 15; i++)); do
+    printf '%s\n\n' "$long_line" >> "$dir/subdir/big.md"
+  done
+  run_hook "Write" "$dir/subdir/big.md"
+  assert_eq "should exit 2 over the threshold on a nested file" "2" "$HOOK_EXIT"
+
+  pointer_line=$(printf '%s\n' "$HOOK_OUT" | grep 'check-density.sh' | head -1)
+  if [ -z "$pointer_line" ]; then
+    fail_count=$((fail_count + 1))
+    printf 'not ok - should print a check-density.sh pointer line\n  actual:   %s\n' "$HOOK_OUT"
+    return
+  fi
+  pass_count=$((pass_count + 1))
+  printf 'ok - should print a check-density.sh pointer line\n'
+
+  # Strip the two leading spaces the report indents pointer lines
+  # with, then run it verbatim as printed.
+  local cmd
+  cmd=$(printf '%s' "$pointer_line" | sed -e 's/^[[:space:]]*//')
+  eval "$cmd" > /dev/null 2>&1
+  local pointer_rc=$?
+  if [ "$pointer_rc" -eq 0 ] || [ "$pointer_rc" -eq 1 ]; then
+    pass_count=$((pass_count + 1))
+    printf 'ok - printed pointer command should resolve the nested file (exit %s)\n' "$pointer_rc"
+  else
+    fail_count=$((fail_count + 1))
+    printf 'not ok - printed pointer command should resolve the nested file\n  command:  %s\n  exit:     %s\n' "$cmd" "$pointer_rc"
+  fi
+}
+
+it_should_keep_the_basename_in_the_header_for_a_nested_file() {
+  local dir long_line
+  dir=$(new_repo_fixture)
+  mkdir -p "$dir/subdir"
+  long_line=$(python3 -c "print('word ' * 120)")
+  : > "$dir/subdir/big.md"
+  for ((i = 0; i < 15; i++)); do
+    printf '%s\n\n' "$long_line" >> "$dir/subdir/big.md"
+  done
+  run_hook "Write" "$dir/subdir/big.md"
+  assert_contains "header should show the basename for a nested file" "prose-format: big.md" "$HOOK_OUT"
+  assert_not_contains "header should not show the full nested path" "subdir/big.md —" "$HOOK_OUT"
+}
+
+it_should_align_the_flag_column_across_printed_commands() {
+  local dir long_bullet
+  dir=$(new_repo_fixture)
+  : > "$dir/mixed.md"
+  # Bullets over the bullet density cap (256c/32w) AND spanning
+  # multiple physical lines - trips both check-density.sh (16
+  # chars) and check-hard-wrap.py (19 chars), two different-length
+  # script names, over the 10-violation threshold.
+  long_bullet=$(python3 -c "print('- ' + 'word ' * 40)")
+  for ((i = 0; i < 12; i++)); do
+    printf '%s\n' "$long_bullet" >> "$dir/mixed.md"
+    printf 'continuation line %s\n\n' "$i" >> "$dir/mixed.md"
+  done
+  run_hook "Write" "$dir/mixed.md"
+  assert_eq "should exit 2 over the threshold on the mixed fixture" "2" "$HOOK_EXIT"
+
+  local columns
+  columns=$(printf '%s\n' "$HOOK_OUT" | grep -- '--changed-only' | sed -n 's/.*\(--changed-only\).*/\1/p' | wc -l)
+  local first_col
+  first_col=$(printf '%s\n' "$HOOK_OUT" | grep -- '--changed-only' | head -1 | awk '{print index($0, "--changed-only")}')
+  local all_match=1
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    local col
+    col=$(printf '%s' "$line" | awk '{print index($0, "--changed-only")}')
+    [ "$col" = "$first_col" ] || all_match=0
+  done < <(printf '%s\n' "$HOOK_OUT" | grep -- '--changed-only')
+
+  if [ "$columns" -ge 2 ] && [ "$all_match" -eq 1 ]; then
+    pass_count=$((pass_count + 1))
+    printf 'ok - --changed-only should start at the same column on every printed command\n'
+  else
+    fail_count=$((fail_count + 1))
+    printf 'not ok - --changed-only should start at the same column on every printed command\n  actual:   %s\n' "$HOOK_OUT"
+  fi
+}
 it_should_stay_silent_on_a_clean_markdown_write
 it_should_report_a_wall_of_text_markdown_write
 it_should_use_the_counts_regime_over_the_threshold
@@ -254,6 +343,9 @@ it_should_fail_open_outside_a_git_repo
 it_should_fail_open_on_a_missing_file
 it_should_fail_open_on_a_non_write_edit_payload
 it_should_carry_the_rule_block_verbatim_in_every_report
+it_should_run_the_printed_pointer_command_for_a_nested_file
+it_should_keep_the_basename_in_the_header_for_a_nested_file
+it_should_align_the_flag_column_across_printed_commands
 
 printf '\n%d passed, %d failed\n' "$pass_count" "$fail_count"
 [ "$fail_count" -eq 0 ]

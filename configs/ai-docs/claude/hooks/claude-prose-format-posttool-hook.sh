@@ -191,8 +191,17 @@ One paragraph = one physical line — never hard-wrap. Never drop information.'
       printf '  %-*s %3d  %s\n' "$((label_width + 2))" "$label" "$count" "$desc"
     done
     printf '\n%s\n\n' "$RULE_BLOCK"
+
+    # name_width is the longest hit checker's basename, so every
+    # printed command's --changed-only flag lines up in one column
+    # regardless of which checker names ran.
+    name_width=0
     while IFS= read -r name; do
-      printf '  ~/.claude/skills/doc-standards/scripts/%s   --changed-only %s\n' "$name" "$base"
+      [ "${#name}" -gt "$name_width" ] && name_width="${#name}"
+    done < "$hit_checkers_file"
+
+    while IFS= read -r name; do
+      printf '  ~/.claude/skills/doc-standards/scripts/%-*s   --changed-only %s\n' "$name_width" "$name" "$FILE_PATH"
     done < "$hit_checkers_file"
   else
     for label in "${labels_seen[@]}"; do
