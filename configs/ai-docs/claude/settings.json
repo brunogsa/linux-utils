@@ -196,6 +196,15 @@
             "command": "bash ~/.claude/hooks/claude-explore-mandate-hook.sh --reset"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/claude-prose-format-posttool-hook.sh"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
