@@ -333,6 +333,48 @@ it_should_align_the_flag_column_across_printed_commands() {
     printf 'not ok - --changed-only should start at the same column on every printed command\n  actual:   %s\n' "$HOOK_OUT"
   fi
 }
+
+it_should_carry_density_char_word_counts_under_the_threshold() {
+  local dir long_line
+  dir=$(new_repo_fixture)
+  long_line=$(python3 -c "print('word ' * 120)")
+  {
+    printf '%s\n\n' "$long_line"
+    printf '%s\n' "$long_line"
+  } > "$dir/small.md"
+  run_hook "Write" "$dir/small.md"
+  assert_eq "should exit 2 under the threshold" "2" "$HOOK_EXIT"
+  assert_contains "density row should carry chars/words for line 1" "L1 " "$HOOK_OUT"
+
+  local density_row
+  density_row=$(printf '%s\n' "$HOOK_OUT" | grep '^  density')
+  if [[ "$density_row" =~ [0-9]+c/[0-9]+w.*,.*[0-9]+c/[0-9]+w ]]; then
+    pass_count=$((pass_count + 1))
+    printf 'ok - density row should carry a c/w detail per line, not just the first\n'
+  else
+    fail_count=$((fail_count + 1))
+    printf 'not ok - density row should carry a c/w detail per line, not just the first\n  actual:   %s\n' "$density_row"
+  fi
+}
+
+it_should_keep_hard_wrap_rows_bare_under_the_threshold() {
+  local dir
+  dir=$(new_repo_fixture)
+  {
+    printf 'One sentence here.\nAnd a second physical line\nfor the same paragraph.\n'
+  } > "$dir/hardwrap.md"
+  run_hook "Write" "$dir/hardwrap.md"
+  local hardwrap_row
+  hardwrap_row=$(printf '%s\n' "$HOOK_OUT" | grep '^  hard-wrap')
+  if [[ "$hardwrap_row" =~ c/[0-9]+w ]]; then
+    fail_count=$((fail_count + 1))
+    printf 'not ok - hard-wrap row should stay bare (no c/w detail)\n  actual:   %s\n' "$hardwrap_row"
+  else
+    pass_count=$((pass_count + 1))
+    printf 'ok - hard-wrap row should stay bare (no c/w detail)\n'
+  fi
+}
+
 it_should_stay_silent_on_a_clean_markdown_write
 it_should_report_a_wall_of_text_markdown_write
 it_should_use_the_counts_regime_over_the_threshold
@@ -346,6 +388,8 @@ it_should_carry_the_rule_block_verbatim_in_every_report
 it_should_run_the_printed_pointer_command_for_a_nested_file
 it_should_keep_the_basename_in_the_header_for_a_nested_file
 it_should_align_the_flag_column_across_printed_commands
+it_should_carry_density_char_word_counts_under_the_threshold
+it_should_keep_hard_wrap_rows_bare_under_the_threshold
 
 printf '\n%d passed, %d failed\n' "$pass_count" "$fail_count"
 [ "$fail_count" -eq 0 ]

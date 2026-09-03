@@ -205,16 +205,19 @@ One paragraph = one physical line — never hard-wrap. Never drop information.'
     done < "$hit_checkers_file"
   else
     for label in "${labels_seen[@]}"; do
+      # Only density rows carry a per-line c/w detail - it tells the
+      # model how far over the cap a line is, which decides one
+      # split vs four. hard-wrap/bullet-gap rows stay bare line
+      # numbers; a flood of detail on every label defeats the
+      # under-threshold regime's whole point.
       lines_for_label=()
-      one_detail=""
-      detail_count=0
       while IFS=$'\t' read -r raw_label line detail; do
         rl=$(label_for_tag "$raw_label")
         [ "$rl" = "$label" ] || continue
-        lines_for_label+=("L$line")
-        if [ -n "$detail" ]; then
-          one_detail="$detail"
-          detail_count=$((detail_count + 1))
+        if [ "$label" = "density" ] && [ -n "$detail" ]; then
+          lines_for_label+=("L$line $detail")
+        else
+          lines_for_label+=("L$line")
         fi
       done < "$rows_file"
       joined=""
@@ -225,11 +228,7 @@ One paragraph = one physical line — never hard-wrap. Never drop information.'
           joined="$joined, $l"
         fi
       done
-      if [ "$detail_count" -eq 1 ] && [ "${#lines_for_label[@]}" -eq 1 ]; then
-        printf '  %-*s %s   %s\n' "$((label_width + 2))" "$label" "$joined" "$one_detail"
-      else
-        printf '  %-*s %s\n' "$((label_width + 2))" "$label" "$joined"
-      fi
+      printf '  %-*s %s\n' "$((label_width + 2))" "$label" "$joined"
     done
     printf '\n%s\n' "$RULE_BLOCK"
   fi
