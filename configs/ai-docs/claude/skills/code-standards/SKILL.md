@@ -131,8 +131,8 @@ return (
   - [Example] Bad: `const getKitBimestre = (kit) => kit.bimestre;`, and a function whose whole body is one call to another — read the property and call the callee directly.
 
 - [Instruction] When unifying duplicated code, normalize the callers onto one shared output — never add a parameter whose only job is to preserve a caller's existing wording or formatting.
-  - [Why] Preserving each caller's incidental wording turns a function that could have stayed simple into a branching one, buying permanent complexity for a difference no caller needs.
-  - [Example] Bad: `formatRateioViolation(sum, { prefix: 'skuKIT', formatSumViolation })`, whose body then branches `const kit = options.prefix ? 'KIT' : 'Kit'`. Good: `formatRateioViolation(sum)` with one message text, and the two callers' expected strings updated to match it.
+  - [Why] The function could have stayed simple; that parameter buys permanent branching for a difference no caller needs.
+  - [Example] Bad: `formatRateioViolation(sum, { prefix })`, whose body branches `const kit = options.prefix ? 'KIT' : 'Kit'`. Good: `formatRateioViolation(sum)`, with both callers' expected strings updated to the one message.
 
 ## Naming
 
@@ -154,7 +154,7 @@ function extractUniqueEmails(rows) { /* ... */ }
 
 - [Instruction] **CRITICAL: Reject a vague, overloaded verb (`resolve`, `handle`, `process`, `manage`) in a name — name the specific operation performed instead.**
   - [Why] A vague verb could mean any of several operations, forcing the reader to open the body to learn which one happens.
-  - [Example] `resolveSoldSupplementaryChildSkus` — deleted, inlined as a direct `unpack()` call at its one call site; `resolveStandaloneSeries` → `mapGroupSeriesSiglas`, naming the conditional mapping it does; `resolveMarca` → `getSharedMarca`. Bad: `resolveSerieRank`, flagged a second time with "as we already discussed before" — `resolve` hides whether it looks up, validates, or orders. Good: `getSerieSortIndex`, naming the sort index it actually returns.
+  - [Example] `resolveSoldSupplementaryChildSkus` — deleted, inlined at its call site; `resolveStandaloneSeries` → `mapGroupSeriesSiglas`; `resolveMarca` → `getSharedMarca`; `resolveSerieRank` → `getSerieSortIndex`, naming the ordinal it returns.
 
 - [Instruction] Rename when a name implies the wrong concept, even when it computes the right value.
   - [Why] A reader trusts the name, not what it computes; a misleading name misdirects them even though the value is correct.
