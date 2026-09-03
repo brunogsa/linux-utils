@@ -1,16 +1,16 @@
 ---
 name: personal-format
-description: "Manual safety-net that formats the user's own recently-changed files to personal comment and markdown standards, on demand only."
+description: "Applies personal comment and markdown standards to files the session wrote or edited (.md, .ts, .js, .sh, .py), or when the user asks to format or clean up comments or markdown. No Stop hook enforces these standards today, so this is the only pass that applies them."
 user-invocable: true
-disable-model-invocation: true
 ---
 
 # Personal Format Safety-Net
 
 Run `comment-format-fixer` and `markdown-standards-fixer` over the files the
-user has changed in the current working tree, for the case where the normal
-per-write Stop hooks didn't cover a file (e.g. it was touched outside this
-session, or hand-edited directly).
+user has changed in the current working tree. No automatic enforcement runs
+today — this skill is currently the only pass that applies these standards,
+including the case where a file was touched outside this session, or
+hand-edited directly.
 
 This skill invents no new checker script and no new scoping logic — it only
 orchestrates the two existing fixer agents over files found with existing git
