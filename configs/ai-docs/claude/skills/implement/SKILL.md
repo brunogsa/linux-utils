@@ -63,7 +63,9 @@ This skill **never merges or deletes §1.2's worktree**; `parallel-worktrees` ca
 
 **§1.1–§1.6 and §2 run once per invocation**, in that order, before execution; §3 starts each unit.
 
-**TaskCreate a lightweight tracking entry for any §1.4–§1.6 step before running it**, when that step takes non-trivial wall-clock (worktree creation, dependency install/build, baseline capture) — flip it `in_progress`/`completed` around the step. This is scaffolding visibility only, separate from and prior to §2's formal per-plan-task seeding; §2 still creates every plan-task and reminder entry itself, never lazily.
+**TaskCreate a lightweight tracking entry for any §1.4–§1.6 step before running it**, when that step takes non-trivial wall-clock (worktree creation, dependency install/build, baseline capture) — flip it `in_progress`/`completed` around the step.
+
+This is scaffolding visibility only, prior to §2's own per-plan-task seeding; §2 still creates every plan-task and reminder entry itself.
 
 ### 1.1. Locate the plan (and spec)
 
@@ -82,7 +84,7 @@ Resolve candidates with this decision tree — it never prompts; ambiguity becom
 
 ### 1.2. One up-front interview
 
-Ask everything at once, before any dispatch — the only round of questions in the run (two or three `AskUserQuestion` calls; each caps at 4 questions and 4 options).
+Ask everything at once, before any dispatch — the run's only round of questions (two or three `AskUserQuestion` calls; each caps at 4 questions and 4 options).
 
 Mid-run `.env` needs are self-served (copied from the original checkout) rather than asked.
 
@@ -98,9 +100,9 @@ Mid-run `.env` needs are self-served (copied from the original checkout) rather 
 
 - **Run the repo-green gate at batch end?** (yes/no, default yes, independent of the quality-gate toggle).
   - Yes runs BOTH §1.6's baseline capture and §8.3's batch-end gate; no runs NEITHER.
-  - The gate classifies pre-existing red only by diffing against a baseline, so a gate without one never terminates.
+  - The gate classifies pre-existing red only by diffing against a baseline, so a gate with none never terminates.
 
-- **Base-branch confirmation** — show `~/.claude/scripts/resolve-base-ref.sh`'s output (origin/HEAD, falling back to local main, then local master) as the default; let the user confirm or override.
+- **Base-branch confirmation** — show `~/.claude/scripts/resolve-base-ref.sh`'s output (origin/HEAD, falling back to local main, then local master) as the default for confirm-or-override.
 
 Record all answers — §2.3 persists them to the state file.
 
@@ -126,7 +128,7 @@ The last two pass trivially with no PR Breakdown, or with the literal "Single PR
 
 The plan stays hand-editable — a later edit can reintroduce a cycle, dangling dependency, or duplicate id, uncaught downstream.
 
-A non-zero exit stops the run: surface the script's stderr diagnostic verbatim and fix the plan before re-invoking.
+A non-zero exit stops the run: surface the stderr diagnostic verbatim and fix the plan before re-invoking.
 
 ### 1.4. Worktree setup (only when §1.2 answered yes)
 
@@ -166,7 +168,7 @@ CLAUDE.md's `metadata` rule yields here: the verdict script and Stop hook are sh
 
 After a batch's task entries, seed a **separate** `[Reminder]` entry per CLAUDE.md's category for each batch-end step this run will perform.
 
-Never one shared chain, since one `completed` flag per task would hide step-level skips and failures.
+Never one shared chain: one `completed` flag per task would hide step-level skips and failures.
 
 **A step the interview toggled off gets no entry at all** — not seeded, not seeded-then-skipped:
 
@@ -309,7 +311,7 @@ Run `~/.claude/skills/spec-driven-development/scripts/extract-planned-tests-for-
 
 Exit 1 (malformed task section) is a plan defect, not a lane choice — stop, per §1.3's non-zero-exit rule.
 
-§5.4's `parallel-worktrees` wave dispatches per-lane: check every eligible id first, then spawn each lane's subset as its own parallel batch — never one mixed dispatch.
+§5.4's `parallel-worktrees` wave dispatches per-lane: check every eligible id, then spawn each lane's subset as its own batch — never one mixed dispatch.
 
 Spawn one fresh-context `agent(subAgent=<lane>, title=Implement task <N>: <task subject>)` per task, in the background — only a background dispatch can carry the Monitor cap below.
 
@@ -329,21 +331,20 @@ Push a `Context`/`Units`/`Verification`/`Optional` block verbatim, using `tdd-co
 
 - **Context**: the task's heading and brief description, in the plan's own words.
 - **Units**: the task's acceptance criteria and planned-test titles, one unit per forcing case, in the plan slice's own order.
-  - Cap one dispatch at **3 units**; a task with more splits into consecutive ≤3-unit dispatches, in plan order, each with its own `<run-label>`. `tdd-coder.md` forbids
-self-splitting, so only this section enforces the cap.
+  - Cap one dispatch at **3 units**; a task with more splits into consecutive ≤3-unit dispatches, in plan order, each with its own `<run-label>`. `tdd-coder.md` forbids self-splitting; enforce the cap here.
   - Even a single-unit dispatch has auto-compacted before, so keep the pushed prompt small.
   - Chunks of one task run **sequentially**, never in parallel — same branch, same git index. Cross-task parallelism stays with `parallel-worktrees` (§5.4).
-  - Give a later chunk's **Context** a one-line summary of what earlier chunks landed, plus `base:`, so it can `git log` the *why*.
+  - Give a later chunk's **Context** a one-line summary of earlier chunks' landing, plus `base:`, so it can `git log` the *why*.
   - A test and the change it covers are **one unit, never two**: `tdd-coder` commits one per unit, so splitting them violates commit-standards.
 - **Verification**: the task's **task-scoped verification commands only**, when the plan names any.
   - Strip any repo-wide/full-suite command (e.g. `test:agentic`, `yarn lint`) before pushing — a subagent verifies only its own change.
-  - A stripped requirement isn't dropped: §8.3's gate re-covers it when on; when off, §8.4's package names what full-suite checks never ran.
+  - A stripped requirement isn't dropped: §8.3's gate re-covers it when on; §8.4's package names it when off.
   - When the plan names none, **omit the field**; `tdd-coder.md` derives one from a file declaring the repo's entry point and reports it plus its source.
-  - Read the derived command off the report and check it covers the task.
+  - Check the derived command in the report covers the task.
   - A wrong one is a plan gap, not a subagent fault — push the correct command on re-dispatch, and write it into its task slice.
-  - Never substitute a full-suite command for a missing task-scoped one — the subagent budgets the full suite at two runs per dispatch, and a stand-in burns it.
+  - Never substitute a full-suite command for a missing task-scoped one — the subagent budgets the full suite at two runs, and a stand-in burns it.
 - **Optional**:
-  - `files:` — the task's **Files (logical order)** list as the **starting set** — touch more when needed, routing the delta per §4.3.
+  - `files:` — the task's **Files (logical order)** list as the **starting set** — touch more when needed, per §4.3.
   - `references:` — `plan_<slug>.md`, plus `spec_<slug>.md` when one exists.
   - `base:` — `BATCH_BASE_SHA` and the base branch.
   - `worktree:` — left unset: a single-worktree run sits inside that worktree via CWD (§1.4); a per-task worktree routes through `parallel-worktrees`'s four-input contract (§5.4).
@@ -447,7 +448,7 @@ The entry list, state-file phase, notes.md's blocked-task record, unrun remainin
 
 **Only the orchestrator edits these markers — the task subagent never touches them.**
 
-Marker vocabulary, placement, and semantics live in [`plan-status-markers`](../plan-status-markers/SKILL.md); load it before any status edit.
+Marker vocabulary, placement, and semantics live in [`plan-status-markers`](../plan-status-markers/SKILL.md); load before any status edit.
 
 ### PR-level status markers (PR Breakdown heading, PR-label runs only)
 
@@ -481,12 +482,9 @@ Run the batch-end flow over `<BATCH_BASE_SHA>..HEAD`, then present the batch for
 
 - **§8.4 — re-push, refresh the PR description, package & finalize.** Both refreshes are skipped when §8.2 and §8.3 landed no commits.
 
-§8.1 runs first because it opens a **draft** PR whose description §8.4 later refreshes against the final diff, and because nothing that can hang may sit between a
-finished batch and its remote — [`references/batch-end-review.md`](references/batch-end-review.md) covers why.
+§8.1 runs first because it opens a **draft** PR whose description §8.4 later refreshes against the final diff — [`references/batch-end-review.md`](references/batch-end-review.md) covers why.
 
-`/quality-gate`'s `test-sdd` leg carries this run's **only** planned-test check, read against the batch's final state.
-
-That leg **writes** the tests it finds missing on every run of the tail.
+`/quality-gate`'s `test-sdd` leg carries this run's **only** planned-test check, read against the batch's final state, and writes any tests it finds missing.
 
 Every dispatch contract, package content, the Finalize step order, and the §5.5 halts on a red repo, a failed push, or a failed PR dispatch live in [`references/batch-end-review.md`](references/batch-end-review.md).
 
