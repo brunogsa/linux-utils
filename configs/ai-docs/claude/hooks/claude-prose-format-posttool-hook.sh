@@ -60,7 +60,7 @@ FILE_PATH=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev
 [ -f "$FILE_PATH" ] || exit 0
 
 ext="${FILE_PATH##*.}"
-base="$(basename "$FILE_PATH")"
+base="$(basename -- "$FILE_PATH")"
 
 # checker_names holds the checker basenames for this file's
 # extension, in the fixed order they run and report in.
@@ -121,7 +121,27 @@ for name in "${checker_names[@]}"; do
   chk="$doc_scripts_dir/$name"
   [ -x "$chk" ] || continue
 
-  out=$("$chk" --changed-only "$FILE_PATH" 2>/dev/null)
+  # invocation_path guards a FILE_PATH whose first character is
+  # "-": passed raw, every checker here would parse it as an
+  # option instead of a path. check-density.sh, check-hard-wrap.py
+  # and check-bullet-gap.py all accept a "--" end-of-options
+  # separator; check-comment-format.js does not, so it gets a
+  # "./"-prefixed path instead.
+  invocation_path="$FILE_PATH"
+  case "$name" in
+    check-comment-format.js)
+      case "$invocation_path" in
+        -*) invocation_path="./$invocation_path" ;;
+      esac
+      out=$("$chk" --changed-only "$invocation_path" 2>/dev/null)
+      ;;
+    *)
+      case "$invocation_path" in
+        -*) out=$("$chk" --changed-only -- "$invocation_path" 2>/dev/null) ;;
+        *) out=$("$chk" --changed-only "$invocation_path" 2>/dev/null) ;;
+      esac
+      ;;
+  esac
   rc=$?
 
   # 0 = clean, anything but 0/1 = no signal from this checker -
@@ -201,7 +221,27 @@ One paragraph = one physical line — never hard-wrap. Never drop information.'
     done < "$hit_checkers_file"
 
     while IFS= read -r name; do
-      printf '  ~/.claude/skills/doc-standards/scripts/%-*s   --changed-only %s\n' "$name_width" "$name" "$FILE_PATH"
+      # print_path/extra_flag mirror the invocation guard above, so
+      # the printed command is the exact one that was actually run -
+      # never a bare unquoted path a shell metacharacter or a space
+      # could split or execute out of.
+      print_path="$FILE_PATH"
+      extra_flag=""
+      case "$name" in
+        check-comment-format.js)
+          case "$print_path" in
+            -*) print_path="./$print_path" ;;
+          esac
+          ;;
+        *)
+          case "$print_path" in
+            -*) extra_flag="-- " ;;
+          esac
+          ;;
+      esac
+      quoted_path=$(printf '%q' "$print_path")
+      printf '  ~/.claude/skills/doc-standards/scripts/%-*s   --changed-only %s%s\n' \
+        "$name_width" "$name" "$extra_flag" "$quoted_path"
     done < "$hit_checkers_file"
   else
     for label in "${labels_seen[@]}"; do

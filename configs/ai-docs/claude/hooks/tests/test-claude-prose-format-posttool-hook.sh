@@ -375,6 +375,118 @@ it_should_keep_hard_wrap_rows_bare_under_the_threshold() {
   fi
 }
 
+it_should_run_correctly_when_the_path_has_a_space() {
+  local dir subdir long_line pointer_line cmd rc
+  dir=$(new_repo_fixture)
+  subdir="$dir/probe dir"
+  mkdir -p "$subdir"
+  long_line=$(python3 -c "print('word ' * 120)")
+  : > "$subdir/wall.md"
+  for ((i = 0; i < 15; i++)); do
+    printf '%s\n\n' "$long_line" >> "$subdir/wall.md"
+  done
+  run_hook "Write" "$subdir/wall.md"
+  assert_eq "should exit 2 over the threshold with a space in the path" "2" "$HOOK_EXIT"
+
+  pointer_line=$(printf '%s\n' "$HOOK_OUT" | grep 'check-density.sh' | head -1)
+  if [ -z "$pointer_line" ]; then
+    fail_count=$((fail_count + 1))
+    printf 'not ok - should print a check-density.sh pointer line for a spaced path\n  actual:   %s\n' "$HOOK_OUT"
+    return
+  fi
+  pass_count=$((pass_count + 1))
+  printf 'ok - should print a check-density.sh pointer line for a spaced path\n'
+
+  cmd=$(printf '%s' "$pointer_line" | sed -e 's/^[[:space:]]*//')
+  eval "$cmd" > /dev/null 2>&1
+  rc=$?
+  if [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ]; then
+    pass_count=$((pass_count + 1))
+    printf 'ok - printed command for a spaced path runs and exits 0 or 1, never 2\n'
+  else
+    fail_count=$((fail_count + 1))
+    printf 'not ok - printed command for a spaced path runs and exits 0 or 1, never 2\n  actual exit: %s\n' "$rc"
+  fi
+}
+
+it_should_produce_an_inert_command_for_a_shell_metacharacter_path() {
+  local dir long_line injected_name sentinel pointer_line cmd rc
+  dir=$(new_repo_fixture)
+  sentinel="$dir/PWNED-marker.md"
+  injected_name='wall; touch PWNED-marker.md #.md'
+  long_line=$(python3 -c "print('word ' * 120)")
+  : > "$dir/$injected_name"
+  for ((i = 0; i < 15; i++)); do
+    printf '%s\n\n' "$long_line" >> "$dir/$injected_name"
+  done
+  run_hook "Write" "$dir/$injected_name"
+  assert_eq "should exit 2 over the threshold with an injected-command filename" "2" "$HOOK_EXIT"
+
+  pointer_line=$(printf '%s\n' "$HOOK_OUT" | grep 'check-density.sh' | head -1)
+  if [ -z "$pointer_line" ]; then
+    fail_count=$((fail_count + 1))
+    printf 'not ok - should print a check-density.sh pointer line for an injected-command filename\n  actual:   %s\n' "$HOOK_OUT"
+    return
+  fi
+  pass_count=$((pass_count + 1))
+  printf 'ok - should print a check-density.sh pointer line for an injected-command filename\n'
+
+  cmd=$(printf '%s' "$pointer_line" | sed -e 's/^[[:space:]]*//')
+  ( cd "$dir" && eval "$cmd" > /dev/null 2>&1 )
+  rc=$?
+  if [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ]; then
+    pass_count=$((pass_count + 1))
+    printf 'ok - printed command for an injected-command filename runs and exits 0 or 1, never 2\n'
+  else
+    fail_count=$((fail_count + 1))
+    printf 'not ok - printed command for an injected-command filename runs and exits 0 or 1, never 2\n  actual exit: %s\n' "$rc"
+  fi
+
+  if [ -f "$sentinel" ]; then
+    fail_count=$((fail_count + 1))
+    printf 'not ok - printed command must never execute the injected touch\n'
+    rm -f "$sentinel"
+  else
+    pass_count=$((pass_count + 1))
+    printf 'ok - printed command must never execute the injected touch\n'
+  fi
+}
+
+it_should_treat_a_leading_dash_filename_as_a_path_not_a_flag() {
+  # tool_input.file_path is the raw argument every downstream tool
+  # sees, so the leading-dash risk is real only when that value
+  # itself starts with "-" - a relative path with no directory
+  # component. cd into the fixture repo so both the hook's own file
+  # check and the checker's --changed-only git lookup resolve it
+  # there.
+  #
+  # get-changed-lines.sh (a shared, out-of-scope dependency every
+  # --changed-only checker calls) has its own pre-existing dirname/
+  # basename bug on a bare leading-dash name, so the checker itself
+  # errors out here (rc 2) regardless of this hook's fix - the
+  # hook's own fail-open contract already treats that as "no
+  # signal". What this hook owns, and what this test pins, is that
+  # its OWN basename call (line ~63) never leaks that option-parsing
+  # garbage onto its stderr while still failing open cleanly.
+  local dir long_line before after orig_pwd
+  dir=$(new_repo_fixture)
+  long_line=$(python3 -c "print('word ' * 120)")
+  : > "$dir/-danger.md"
+  for ((i = 0; i < 15; i++)); do
+    printf '%s\n\n' "$long_line" >> "$dir/-danger.md"
+  done
+  before=$(cat "$dir/-danger.md")
+  orig_pwd=$(pwd)
+  cd "$dir" || return
+  run_hook "Write" "-danger.md"
+  cd "$orig_pwd" || return
+  assert_eq "should fail open on a leading-dash filename (its own basename call must never crash)" "0" "$HOOK_EXIT"
+  assert_eq "should fail open silently, never leaking a basename/dirname option-parsing error" "" "$HOOK_OUT"
+
+  after=$(cat "$dir/-danger.md")
+  assert_eq "the checker must never rewrite the file while parsing its own leading-dash name" "$before" "$after"
+}
+
 it_should_stay_silent_on_a_clean_markdown_write
 it_should_report_a_wall_of_text_markdown_write
 it_should_use_the_counts_regime_over_the_threshold
@@ -390,6 +502,9 @@ it_should_keep_the_basename_in_the_header_for_a_nested_file
 it_should_align_the_flag_column_across_printed_commands
 it_should_carry_density_char_word_counts_under_the_threshold
 it_should_keep_hard_wrap_rows_bare_under_the_threshold
+it_should_run_correctly_when_the_path_has_a_space
+it_should_produce_an_inert_command_for_a_shell_metacharacter_path
+it_should_treat_a_leading_dash_filename_as_a_path_not_a_flag
 
 printf '\n%d passed, %d failed\n' "$pass_count" "$fail_count"
 [ "$fail_count" -eq 0 ]
