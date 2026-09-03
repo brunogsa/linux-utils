@@ -130,6 +130,10 @@ return (
   - [Why] Each counter-intuitive-API site is a future bug, so taming it pays off; wrapping `Date.now()` only adds indirection.
   - [Example] Bad: `const getKitBimestre = (kit) => kit.bimestre;`, and a function whose whole body is one call to another — read the property and call the callee directly.
 
+- [Instruction] When unifying duplicated code, normalize the callers onto one shared output — never add a parameter whose only job is to preserve a caller's existing wording or formatting.
+  - [Why] Preserving each caller's incidental wording turns a function that could have stayed simple into a branching one, buying permanent complexity for a difference no caller needs.
+  - [Example] Bad: `formatRateioViolation(sum, { prefix: 'skuKIT', formatSumViolation })`, whose body then branches `const kit = options.prefix ? 'KIT' : 'Kit'`. Good: `formatRateioViolation(sum)` with one message text, and the two callers' expected strings updated to match it.
+
 ## Naming
 
 ### Name by purpose, clearly
@@ -150,7 +154,7 @@ function extractUniqueEmails(rows) { /* ... */ }
 
 - [Instruction] **CRITICAL: Reject a vague, overloaded verb (`resolve`, `handle`, `process`, `manage`) in a name — name the specific operation performed instead.**
   - [Why] A vague verb could mean any of several operations, forcing the reader to open the body to learn which one happens.
-  - [Example] `resolveSoldSupplementaryChildSkus` — deleted, inlined as a direct `unpack()` call at its one call site; `resolveStandaloneSeries` → `mapGroupSeriesSiglas`, naming the conditional mapping it does; `resolveMarca` → `getSharedMarca`.
+  - [Example] `resolveSoldSupplementaryChildSkus` — deleted, inlined as a direct `unpack()` call at its one call site; `resolveStandaloneSeries` → `mapGroupSeriesSiglas`, naming the conditional mapping it does; `resolveMarca` → `getSharedMarca`. Bad: `resolveSerieRank`, flagged a second time with "as we already discussed before" — `resolve` hides whether it looks up, validates, or orders. Good: `getSerieSortIndex`, naming the sort index it actually returns.
 
 - [Instruction] Rename when a name implies the wrong concept, even when it computes the right value.
   - [Why] A reader trusts the name, not what it computes; a misleading name misdirects them even though the value is correct.
@@ -406,6 +410,7 @@ async function fetchLogs({ logGroups, logRadius, workDir }) {
 
 - [Instruction] Never add code whose only purpose is to emit a log — no log-only branch, variable, or early return.
   - [Why] A log-only branch buys observability an inline log already gives, and charges every future reader for the extra path.
+  - [Example] Bad: `if (professorLines.length > 0) { logger.debug({ message: '…' }) }` — the branch exists only to gate the log. Good: log unconditionally and carry `professorLinesCount: professorLines.length` in the payload.
 
 - [Instruction] Logs must never crash the flow — every reducer/accessor/template expression must tolerate undefined or empty inputs.
   - [Why] Telemetry that crashes the flow removes the very thing meant to help you debug.
@@ -479,6 +484,10 @@ logger.debug({
 
 - [Instruction] **Normalize data at the entry point — convert string dates and numbers-as-strings to proper types right after validation.**
   - [Why] Defer normalization and you scatter `parseInt`/`new Date` across the codebase.
+
+- [Instruction] Never recover a value by parsing a string the same codebase composed — carry the original value alongside the composed one instead.
+  - [Why] The parse re-derives what the code already held, and it breaks silently the moment the composition format changes.
+  - [Example] Bad: `parseBimestreFromBimester(bimester, anoVigencia)` slicing `${bimestre}${anoVigencia}` back apart. Good: pass `bimestre` through beside the composed field.
 
 - [Instruction] **CRITICAL: Use an enum for a fixed set of related magic values; a named constant for a standalone one.**
   - [Why] A `10`/`"KIT"` scattered across files is a coordination problem on change — a constant is grep-able, changed once.

@@ -172,8 +172,9 @@ Why: this order maximizes comprehension per minute — context → behavior → 
 
 - Don't suggest broad rewrites — prefer small, surgical changes.
 - Don't ask questions without explaining their impact.
+- Don't recommend extending a pattern the coding standards forbid — check the existing code against the standards before proposing more of it.
 
-Why: surgical changes get merged while rewrite requests get pushback, and an impact-less question gets ignored.
+Why: surgical changes get merged while rewrite requests get pushback, an impact-less question gets ignored, and a recommendation that grows a forbidden pattern makes the review itself the reason the defect ships.
 
 ## Output language matches the invoking context
 
