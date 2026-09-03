@@ -128,7 +128,7 @@ return (
 
 - [Instruction] A wrapper must earn its keep — by adding behavior (retry, logging, validation) or by giving a counter-intuitive API an intuitive interface; never by merely forwarding to what it wraps.
   - [Why] Each counter-intuitive-API site is a future bug, so taming it pays off; wrapping `Date.now()` only adds indirection.
-  - [Example] Bad: `const getKitBimestre = (kit) => kit.bimestre;`, and a function whose whole body is one call to another — read the property and call the callee directly.
+  - [Example] Bad: `const getKitBimestre = (kit) => kit.bimestre;`, or a body that is one call to what it wraps. Good: `kit.bimestre` at the call site, and call the callee directly.
 
 - [Instruction] When unifying duplicated code, normalize the callers onto one shared output — never add a parameter whose only job is to preserve a caller's existing wording or formatting.
   - [Why] The function could have stayed simple; that parameter buys permanent branching for a difference no caller needs.
