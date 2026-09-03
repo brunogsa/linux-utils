@@ -123,10 +123,12 @@ for name in "${checker_names[@]}"; do
 
   # invocation_path guards a FILE_PATH whose first character is
   # "-": passed raw, every checker here would parse it as an
-  # option instead of a path. check-density.sh, check-hard-wrap.py
-  # and check-bullet-gap.py all accept a "--" end-of-options
-  # separator; check-comment-format.js does not, so it gets a
-  # "./"-prefixed path instead.
+  # option instead of a path.
+  #
+  # check-density.sh, check-hard-wrap.py and check-bullet-gap.py
+  # all accept a "--" end-of-options separator;
+  # check-comment-format.js does not, so it gets a "./"-prefixed
+  # path instead.
   invocation_path="$FILE_PATH"
   case "$name" in
     check-comment-format.js)
@@ -213,18 +215,18 @@ One paragraph = one physical line — never hard-wrap. Never drop information.'
     printf '\n%s\n\n' "$RULE_BLOCK"
 
     # name_width is the longest hit checker's basename, so every
-    # printed command's --changed-only flag lines up in one column
-    # regardless of which checker names ran.
+    # printed command's --changed-only flag lines up in one
+    # column regardless of which checker names ran.
     name_width=0
     while IFS= read -r name; do
       [ "${#name}" -gt "$name_width" ] && name_width="${#name}"
     done < "$hit_checkers_file"
 
     while IFS= read -r name; do
-      # print_path/extra_flag mirror the invocation guard above, so
-      # the printed command is the exact one that was actually run -
-      # never a bare unquoted path a shell metacharacter or a space
-      # could split or execute out of.
+      # print_path/extra_flag mirror the invocation guard above,
+      # so the printed command is the exact one that was
+      # actually run - never a bare unquoted path a shell
+      # metacharacter or a space could split or execute out of.
       print_path="$FILE_PATH"
       extra_flag=""
       case "$name" in
@@ -245,10 +247,12 @@ One paragraph = one physical line — never hard-wrap. Never drop information.'
     done < "$hit_checkers_file"
   else
     for label in "${labels_seen[@]}"; do
-      # Only density rows carry a per-line c/w detail - it tells the
-      # model how far over the cap a line is, which decides one
-      # split vs four. hard-wrap/bullet-gap rows stay bare line
-      # numbers; a flood of detail on every label defeats the
+      # Only density rows carry a per-line c/w detail - it tells
+      # the model how far over the cap a line is, which decides
+      # one split vs four.
+      #
+      # hard-wrap/bullet-gap rows stay bare line numbers; a
+      # flood of detail on every label defeats the
       # under-threshold regime's whole point.
       lines_for_label=()
       while IFS=$'\t' read -r raw_label line detail; do

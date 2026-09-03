@@ -148,9 +148,10 @@ it_should_use_the_counts_regime_over_the_threshold() {
     pass_count=$((pass_count + 1))
     printf 'ok - should not print any L<digits> line-number row over threshold\n'
   fi
+
   # The pointer command must resolve when run as printed, so it
-  # carries the real file_path (defect 1), never the bare basename
-  # the header shows.
+  # carries the real file_path (defect 1), never the bare
+  # basename the header shows.
   assert_contains "should list the checker's own script pointer over threshold" \
     "check-density.sh   --changed-only $dir/big.md" "$HOOK_OUT"
 }
@@ -268,8 +269,8 @@ it_should_run_the_printed_pointer_command_for_a_nested_file() {
   pass_count=$((pass_count + 1))
   printf 'ok - should print a check-density.sh pointer line\n'
 
-  # Strip the two leading spaces the report indents pointer lines
-  # with, then run it verbatim as printed.
+  # Strip the two leading spaces the report indents pointer
+  # lines with, then run it verbatim as printed.
   local cmd
   cmd=$(printf '%s' "$pointer_line" | sed -e 's/^[[:space:]]*//')
   eval "$cmd" > /dev/null 2>&1
@@ -301,10 +302,13 @@ it_should_align_the_flag_column_across_printed_commands() {
   local dir long_bullet
   dir=$(new_repo_fixture)
   : > "$dir/mixed.md"
+
   # Bullets over the bullet density cap (256c/32w) AND spanning
   # multiple physical lines - trips both check-density.sh (16
-  # chars) and check-hard-wrap.py (19 chars), two different-length
-  # script names, over the 10-violation threshold.
+  # chars) and check-hard-wrap.py (19 chars).
+  #
+  # Two different-length script names, over the 10-violation
+  # threshold.
   long_bullet=$(python3 -c "print('- ' + 'word ' * 40)")
   for ((i = 0; i < 12; i++)); do
     printf '%s\n' "$long_bullet" >> "$dir/mixed.md"
@@ -453,21 +457,28 @@ it_should_produce_an_inert_command_for_a_shell_metacharacter_path() {
 }
 
 it_should_treat_a_leading_dash_filename_as_a_path_not_a_flag() {
-  # tool_input.file_path is the raw argument every downstream tool
-  # sees, so the leading-dash risk is real only when that value
-  # itself starts with "-" - a relative path with no directory
-  # component. cd into the fixture repo so both the hook's own file
-  # check and the checker's --changed-only git lookup resolve it
+  # tool_input.file_path is the raw argument every downstream
+  # tool sees, so the leading-dash risk is real only when that
+  # value itself starts with "-" - a relative path with no
+  # directory component.
+
+  # cd into the fixture repo so both the hook's own file check
+  # and the checker's --changed-only git lookup resolve it
   # there.
-  #
-  # get-changed-lines.sh (a shared, out-of-scope dependency every
-  # --changed-only checker calls) has its own pre-existing dirname/
-  # basename bug on a bare leading-dash name, so the checker itself
-  # errors out here (rc 2) regardless of this hook's fix - the
-  # hook's own fail-open contract already treats that as "no
-  # signal". What this hook owns, and what this test pins, is that
-  # its OWN basename call (line ~63) never leaks that option-parsing
-  # garbage onto its stderr while still failing open cleanly.
+
+  # get-changed-lines.sh (a shared, out-of-scope dependency
+  # every --changed-only checker calls) has its own
+  # pre-existing dirname/basename bug on a bare leading-dash
+  # name.
+
+  # So the checker itself errors out here (rc 2) regardless of
+  # this hook's fix - the hook's own fail-open contract already
+  # treats that as "no signal".
+
+  # What this hook owns, and what this test pins, is that its
+  # OWN basename call (line ~63) never leaks that
+  # option-parsing garbage onto its stderr while still failing
+  # open cleanly.
   local dir long_line before after orig_pwd
   dir=$(new_repo_fixture)
   long_line=$(python3 -c "print('word ' * 120)")
