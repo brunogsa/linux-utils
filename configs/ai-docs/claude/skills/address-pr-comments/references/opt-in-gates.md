@@ -28,9 +28,10 @@ If either is red, abort — fix pre-existing breakage first so cluster commits d
 
 ## Repo-green gate — step 5's baseline + gate
 
-Runs only on a yes to step 0's "Repo-green gate after changes?" — distinct from 1c above.
-
-1c only aborts on pre-existing red before starting. This gate actively fixes any regression the batch itself introduced, then blocks the push until the repo is green.
+Runs only on a yes to step 0 row 4 — a single toggle covering both the internal baseline dispatch below and the pre-push gate; the user is asked
+about the pre-push outcome only, never about the baseline capture separately. This is a distinct mechanism from row 2 / 1c above, not a rerun of it:
+1c is file-scoped and only aborts on pre-existing red before starting; this gate is repo-wide, actively fixes any regression the batch itself
+introduced, then blocks the push until the repo is green. A "no" to row 2 has no bearing on whether row 4's internal baseline dispatch runs.
 
 Unlike 1c's file-scoped discovery, both dispatches below use the repo's **full**, repo-wide lint + test commands — the same ones you'd run before opening a PR, not just this batch's files.
 

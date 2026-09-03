@@ -82,9 +82,9 @@ If `PR_BRANCH != CUR_BRANCH`, abort:
 
 ### 1b. Clean working tree
 
-Never proceed with a dirty tree — uncommitted work risks getting bundled into a cluster commit.
-
-Step 0's persisted answer says whether to commit now via `commit-standards`; once the user commits or stashes, re-run the skill.
+Step 0's persisted answer decides what happens next: `commit_now` commits via `commit-standards` then continues; `proceed_without_committing`
+continues straight through, since step 5 only ever stages cluster-relevant paths so the dirty files can't get bundled in; `stop_here` aborts so the
+user commits/stashes by hand, then re-runs the skill.
 
 ### 1c. Green baseline (lint + test — opt-in)
 
