@@ -5,7 +5,12 @@
 #   <line>:<chars>:<words>      one per violation
 #   == <filename>               header (for each file that has hits)
 #
-# Caps default to 256 chars / 32 words per line (override with flags).
+# Two caps, chosen by line shape (override with flags):
+#   prose line (no bullet marker):  512 chars / 64 words (--max-chars/--max-words)
+#   bullet/sub-bullet/ordered line: 256 chars / 32 words (--bullet-chars/--bullet-words)
+# A bullet line is one matching ^\s*([-*+]|\d+\.)\s (same shape check-hard-wrap.py
+# uses), so an indented sub-bullet or an ordered "1. " line both take the
+# bullet cap, never the looser prose cap.
 #
 # Skips: leading YAML frontmatter (--- ... ---), fenced code blocks (``` or ~~~),
 # blank lines, table rows, HTML-tag-only lines, link-only lines (a single
@@ -21,7 +26,8 @@
 # collapses to its label, giving the rendered density a reader actually sees.
 #
 # Usage:
-#   check-density.sh [--max-chars N] [--max-words N] [--changed-only] <file> [<file>...]
+#   check-density.sh [--max-chars N] [--max-words N] [--bullet-chars N]
+#     [--bullet-words N] [--changed-only] <file> [<file>...]
 #
 # --changed-only scopes violations to lines get-changed-lines.sh reports
 # as changed vs git HEAD (see that script's own docstring for what
@@ -47,8 +53,10 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-MAX_CHARS=256
-MAX_WORDS=32
+MAX_CHARS=512
+MAX_WORDS=64
+BULLET_CHARS=256
+BULLET_WORDS=32
 CHANGED_ONLY=0
 FILES=()
 
@@ -56,6 +64,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --max-chars) MAX_CHARS="${2:?}"; shift 2 ;;
     --max-words) MAX_WORDS="${2:?}"; shift 2 ;;
+    --bullet-chars) BULLET_CHARS="${2:?}"; shift 2 ;;
+    --bullet-words) BULLET_WORDS="${2:?}"; shift 2 ;;
     --changed-only) CHANGED_ONLY=1; shift ;;
     --) shift; FILES+=("$@"); break ;;
     -*) echo "unknown opt: $1" >&2; exit 2 ;;
@@ -63,7 +73,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ ${#FILES[@]} -eq 0 ]] && { echo "usage: check-density.sh [--max-chars N] [--max-words N] [--changed-only] <file>..." >&2; exit 2; }
+[[ ${#FILES[@]} -eq 0 ]] && { echo "usage: check-density.sh [--max-chars N] [--max-words N] [--bullet-chars N] [--bullet-words N] [--changed-only] <file>..." >&2; exit 2; }
 
 # check_one_file - runs the density awk program over a single file,
 # restricting hits to CHANGED_CSV's line numbers when scoped is "1".
@@ -72,7 +82,8 @@ done
 # file, and awk has no clean way to key a per-file array off ARGV.
 check_one_file() {
   local file="$1" scoped="$2" changed_csv="$3"
-  awk -v mc="$MAX_CHARS" -v mw="$MAX_WORDS" -v scoped="$scoped" -v changed_csv="$changed_csv" '
+  awk -v mc="$MAX_CHARS" -v mw="$MAX_WORDS" -v bc="$BULLET_CHARS" -v bw="$BULLET_WORDS" \
+      -v scoped="$scoped" -v changed_csv="$changed_csv" '
     BEGIN {
       if (scoped && changed_csv != "") {
         n = split(changed_csv, nums, ",")
@@ -90,10 +101,13 @@ check_one_file() {
     /^[[:space:]]*<\/?[a-zA-Z][^>]*>[[:space:]]*$/                { next }
     /^[[:space:]]*([>*+-]|[0-9]+\.)?[[:space:]]*\[[^]]+\]\([^)]+\)[[:space:]]*\.?[[:space:]]*$/ { next }
     {
+      is_bullet = ($0 ~ /^[[:space:]]*([-*+]|[0-9]+\.)[[:space:]]/)
+      eff_mc = is_bullet ? bc : mc
+      eff_mw = is_bullet ? bw : mw
       gsub(/\(https?:\/\/[^)]*\)/, "")
       gsub(/[(<]data:[^)>]*[)>]/, "")
       gsub(/[][]/, "")
-      if (length($0) > mc || NF > mw) {
+      if (length($0) > eff_mc || NF > eff_mw) {
         if (scoped && !(FNR in changed)) next
         printf "%d:%d:%d\n", FNR, length($0), NF
         hit = 1

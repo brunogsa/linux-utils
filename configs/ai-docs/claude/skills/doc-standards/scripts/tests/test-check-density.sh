@@ -53,13 +53,23 @@ repeat_char() {
   printf "${char}%.0s" $(seq 1 "$count")
 }
 
-# 300 chars, 1 word - trips only the char cap, never the word cap.
-LONG_A_LINE=$(repeat_char a 300)
-LONG_B_LINE=$(repeat_char b 300)
-# 60 chars, 1 word - under both default caps.
+# 600 chars, 1 word - trips only the prose char cap (512), never the
+# prose word cap (64).
+LONG_A_LINE=$(repeat_char a 600)
+LONG_B_LINE=$(repeat_char b 600)
+# 60 chars, 1 word - under both the prose (512/64) and bullet (256/32)
+# default caps.
 SIXTY_X_LINE=$(repeat_char x 60)
-# 40 "word " units = 200 chars, 40 words - trips only the word cap.
-LONG_WORDCOUNT_LINE=$(printf 'word %.0s' $(seq 1 40))
+# 70 "word " units = 350 chars, 70 words - trips only the prose word
+# cap (64), stays under the prose char cap (512).
+LONG_WORDCOUNT_LINE=$(printf 'word %.0s' $(seq 1 70))
+# 40 "abcdefgh " units = 360 chars, 40 words - between the bullet cap
+# (256 chars/32 words) and the prose cap (512 chars/64 words) on both
+# dimensions at once: flags as a bullet, stays clean as prose.
+BETWEEN_CAPS_LINE=$(printf 'abcdefgh %.0s' $(seq 1 40))
+# 80 "abcdefgh " units = 720 chars, 80 words - over the prose cap (512
+# chars/64 words) on both dimensions at once.
+OVER_PROSE_CAP_LINE=$(printf 'abcdefgh %.0s' $(seq 1 80))
 
 # new_fixture - writes $2 into a fresh tmp file under a plain
 # (non-git) directory, sets FIXTURE to its path. Used by the baseline
@@ -107,7 +117,7 @@ it_should_flag_a_line_over_the_char_cap() {
   new_fixture long-chars.md "$(printf '%s\n' "$LONG_A_LINE")"
   run_check
   assert_eq 'should flag a line over the char cap (stdout)' \
-    "$(printf '== %s\n1:300:1' "$FIXTURE")" "$CHECK_OUT"
+    "$(printf '== %s\n1:600:1' "$FIXTURE")" "$CHECK_OUT"
   assert_eq 'should flag a line over the char cap (exit code)' '1' "$CHECK_EXIT"
 }
 
@@ -115,15 +125,15 @@ it_should_flag_a_line_over_the_word_cap() {
   new_fixture long-words.md "$(printf '%s\n' "$LONG_WORDCOUNT_LINE")"
   run_check
   assert_eq 'should flag a line over the word cap (stdout)' \
-    "$(printf '== %s\n1:200:40' "$FIXTURE")" "$CHECK_OUT"
+    "$(printf '== %s\n1:350:70' "$FIXTURE")" "$CHECK_OUT"
   assert_eq 'should flag a line over the word cap (exit code)' '1' "$CHECK_EXIT"
 }
 
 it_should_flag_a_line_only_once_max_chars_is_tightened_below_its_length() {
   new_fixture sixty-chars.md "$(printf '%s\n' "$SIXTY_X_LINE")"
   run_check
-  assert_eq 'should stay clean under the default 256-char cap' '' "$CHECK_OUT"
-  assert_eq 'should stay clean under the default 256-char cap (exit code)' \
+  assert_eq 'should stay clean under the default 512-char prose cap' '' "$CHECK_OUT"
+  assert_eq 'should stay clean under the default 512-char prose cap (exit code)' \
     '0' "$CHECK_EXIT"
 
   run_check --max-chars 50
@@ -166,7 +176,7 @@ it_should_print_a_header_and_blank_line_between_multiple_hit_files() {
   local rc=$?
 
   assert_eq 'should print a header + blank-line separator across hit files (stdout)' \
-    "$(printf '== %s\n1:300:1\n\n== %s\n1:300:1' "$fixture_a" "$fixture_b")" "$out"
+    "$(printf '== %s\n1:600:1\n\n== %s\n1:600:1' "$fixture_a" "$fixture_b")" "$out"
   assert_eq 'should print a header + blank-line separator across hit files (exit code)' \
     '1' "$rc"
 }
@@ -177,6 +187,85 @@ it_should_exit_2_when_no_files_given() {
   local rc=$?
   assert_eq 'should exit 2 when no files are given' '2' "$rc"
   assert_contains 'should exit 2 when no files are given (usage message)' 'usage:' "$out"
+}
+
+# --- Bullet vs prose caps: bullets/sub-bullets/ordered bullets stay at the
+# tighter 256-char/32-word cap; everything else (prose) gets the looser
+# 512-char/64-word cap. BETWEEN_CAPS_LINE (360 chars/40 words) sits strictly
+# between the two, so it is the one fixture that tells them apart: it must
+# flag when written as a bullet and stay clean when written as prose. ---
+
+it_should_not_flag_a_prose_line_between_the_two_caps() {
+  new_fixture between-caps-prose.md "$(printf '%s\n' "$BETWEEN_CAPS_LINE")"
+  run_check
+  assert_eq 'should not flag a prose line between the bullet and prose caps (stdout)' \
+    '' "$CHECK_OUT"
+  assert_eq 'should not flag a prose line between the bullet and prose caps (exit code)' \
+    '0' "$CHECK_EXIT"
+}
+
+it_should_flag_a_bullet_line_between_the_two_caps() {
+  new_fixture between-caps-bullet.md "$(printf -- '- %s\n' "$BETWEEN_CAPS_LINE")"
+  run_check
+  assert_eq 'should flag a plain bullet line between the two caps (stdout)' \
+    "$(printf '== %s\n1:362:41' "$FIXTURE")" "$CHECK_OUT"
+  assert_eq 'should flag a plain bullet line between the two caps (exit code)' \
+    '1' "$CHECK_EXIT"
+
+  new_fixture between-caps-sub-bullet.md "$(printf -- '  - %s\n' "$BETWEEN_CAPS_LINE")"
+  run_check
+  assert_eq 'should flag an indented sub-bullet line between the two caps (stdout)' \
+    "$(printf '== %s\n1:364:41' "$FIXTURE")" "$CHECK_OUT"
+  assert_eq 'should flag an indented sub-bullet line between the two caps (exit code)' \
+    '1' "$CHECK_EXIT"
+
+  new_fixture between-caps-ordered.md "$(printf -- '1. %s\n' "$BETWEEN_CAPS_LINE")"
+  run_check
+  assert_eq 'should flag an ordered bullet line between the two caps (stdout)' \
+    "$(printf '== %s\n1:363:41' "$FIXTURE")" "$CHECK_OUT"
+  assert_eq 'should flag an ordered bullet line between the two caps (exit code)' \
+    '1' "$CHECK_EXIT"
+}
+
+it_should_flag_a_prose_line_over_the_prose_cap() {
+  new_fixture over-prose-cap.md "$(printf '%s\n' "$OVER_PROSE_CAP_LINE")"
+  run_check
+  assert_eq 'should flag a prose line over the prose cap (stdout)' \
+    "$(printf '== %s\n1:720:80' "$FIXTURE")" "$CHECK_OUT"
+  assert_eq 'should flag a prose line over the prose cap (exit code)' \
+    '1' "$CHECK_EXIT"
+}
+
+it_should_apply_bullet_and_prose_flags_independently() {
+  # A bullet line: loosening the prose flags must not clear it (bullet cap
+  # still governs); loosening the bullet flags must.
+  new_fixture independent-bullet.md "$(printf -- '- %s\n' "$BETWEEN_CAPS_LINE")"
+  run_check --max-chars 2000 --max-words 2000
+  assert_eq 'should keep flagging a bullet line when only the prose flags are loosened (stdout)' \
+    "$(printf '== %s\n1:362:41' "$FIXTURE")" "$CHECK_OUT"
+  assert_eq 'should keep flagging a bullet line when only the prose flags are loosened (exit code)' \
+    '1' "$CHECK_EXIT"
+
+  run_check --bullet-chars 2000 --bullet-words 2000
+  assert_eq 'should clear a bullet line once the bullet flags are loosened (stdout)' \
+    '' "$CHECK_OUT"
+  assert_eq 'should clear a bullet line once the bullet flags are loosened (exit code)' \
+    '0' "$CHECK_EXIT"
+
+  # A prose line: loosening the bullet flags must not clear it (prose cap
+  # still governs); loosening the prose flags must.
+  new_fixture independent-prose.md "$(printf '%s\n' "$OVER_PROSE_CAP_LINE")"
+  run_check --bullet-chars 2000 --bullet-words 2000
+  assert_eq 'should keep flagging a prose line when only the bullet flags are loosened (stdout)' \
+    "$(printf '== %s\n1:720:80' "$FIXTURE")" "$CHECK_OUT"
+  assert_eq 'should keep flagging a prose line when only the bullet flags are loosened (exit code)' \
+    '1' "$CHECK_EXIT"
+
+  run_check --max-chars 2000 --max-words 2000
+  assert_eq 'should clear a prose line once the prose flags are loosened (stdout)' \
+    '' "$CHECK_OUT"
+  assert_eq 'should clear a prose line once the prose flags are loosened (exit code)' \
+    '0' "$CHECK_EXIT"
 }
 
 # --- --changed-only: scope violations to lines changed vs git HEAD ---
@@ -191,7 +280,7 @@ it_should_report_every_line_as_changed_for_an_untracked_file() {
   local rc=$?
 
   assert_eq 'should report every line as changed for an untracked file (stdout)' \
-    "$(printf '== new.md\n1:300:1')" "$out"
+    "$(printf '== new.md\n1:600:1')" "$out"
   assert_eq 'should report every line as changed for an untracked file (exit code)' \
     '1' "$rc"
 }
@@ -207,13 +296,13 @@ it_should_hide_pre_existing_violations_outside_changed_lines() {
   local baseline
   baseline=$(cd "$repo" && "$SCRIPT" mod.md 2>&1)
   assert_eq 'should still report both violations without the flag (baseline)' \
-    "$(printf '== mod.md\n1:300:1\n3:300:1')" "$baseline"
+    "$(printf '== mod.md\n1:600:1\n3:600:1')" "$baseline"
 
   local scoped rc
   scoped=$(cd "$repo" && "$SCRIPT" --changed-only mod.md 2>&1)
   rc=$?
   assert_eq 'should hide the pre-existing violation and report only the added one (stdout)' \
-    "$(printf '== mod.md\n3:300:1')" "$scoped"
+    "$(printf '== mod.md\n3:600:1')" "$scoped"
   assert_eq 'should hide the pre-existing violation and report only the added one (exit code)' \
     '1' "$rc"
 }
@@ -228,7 +317,7 @@ it_should_report_nothing_for_an_unmodified_tracked_file() {
   local baseline
   baseline=$(cd "$repo" && "$SCRIPT" base.md 2>&1)
   assert_eq 'should still report the violation without the flag (baseline)' \
-    "$(printf '== base.md\n1:300:1')" "$baseline"
+    "$(printf '== base.md\n1:600:1')" "$baseline"
 
   local scoped rc
   scoped=$(cd "$repo" && "$SCRIPT" --changed-only base.md 2>&1)
@@ -263,7 +352,7 @@ it_should_scope_multiple_files_independently() {
   out=$(cd "$repo" && "$SCRIPT" --changed-only a.md b.md 2>&1)
   rc=$?
   assert_eq 'should scope multiple files independently (stdout)' \
-    "$(printf '== a.md\n2:300:1')" "$out"
+    "$(printf '== a.md\n2:600:1')" "$out"
   assert_eq 'should scope multiple files independently (exit code)' '1' "$rc"
 }
 
@@ -285,7 +374,7 @@ it_should_recompute_scope_fresh_on_each_invocation() {
   second_out=$(cd "$repo" && "$SCRIPT" --changed-only fresh.md 2>&1)
   second_rc=$?
   assert_eq 'should pick up the new violation on the very next invocation (stdout)' \
-    "$(printf '== fresh.md\n2:300:1')" "$second_out"
+    "$(printf '== fresh.md\n2:600:1')" "$second_out"
   assert_eq 'should pick up the new violation on the very next invocation (exit code)' \
     '1' "$second_rc"
 }
@@ -299,6 +388,10 @@ it_should_skip_fenced_code_block_content
 it_should_skip_table_rows
 it_should_print_a_header_and_blank_line_between_multiple_hit_files
 it_should_exit_2_when_no_files_given
+it_should_not_flag_a_prose_line_between_the_two_caps
+it_should_flag_a_bullet_line_between_the_two_caps
+it_should_flag_a_prose_line_over_the_prose_cap
+it_should_apply_bullet_and_prose_flags_independently
 it_should_report_every_line_as_changed_for_an_untracked_file
 it_should_hide_pre_existing_violations_outside_changed_lines
 it_should_report_nothing_for_an_unmodified_tracked_file
