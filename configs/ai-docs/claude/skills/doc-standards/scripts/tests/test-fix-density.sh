@@ -109,7 +109,7 @@ it_should_split_an_over_cap_line_at_a_sentence_boundary_with_both_halves_under_t
   cat > "$FIXTURE" <<'EOF'
 # AC4 fixture
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents. This second clause continues the thought after the boundary so the split can balance both halves reasonably well.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today. This second clause continues the thought after the boundary so the split can balance both halves reasonably well, again padded with a few more harmless extra words so the whole line clears the new prose cap comfortably while each half still stays safely under it.
 EOF
 
   run_fix
@@ -123,9 +123,9 @@ EOF
   cat > "$expected_file" <<'EOF'
 # AC4 fixture
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today.
 
-This second clause continues the thought after the boundary so the split can balance both halves reasonably well.
+This second clause continues the thought after the boundary so the split can balance both halves reasonably well, again padded with a few more harmless extra words so the whole line clears the new prose cap comfortably while each half still stays safely under it.
 EOF
   local expected
   expected="$(cat "$expected_file")"
@@ -140,7 +140,7 @@ it_should_leave_an_over_cap_line_with_no_safe_boundary_untouched_and_exit_1_repo
   cat > "$FIXTURE" <<'EOF'
 # AC5 fixture
 
-This line deliberately avoids every recognized split boundary so the fixer has nowhere safe to break it and must leave it fully untouched while reporting it as residue instead of mutating anything inside it here
+This line deliberately avoids every recognized split boundary so the fixer has nowhere safe to break it and must leave it fully untouched while reporting it as residue instead of mutating anything inside it here today no matter how far past the new five hundred and twelve character prose density cap its overall length happens to stretch on this single unbroken run-on sentence with no period no semicolon and no other recognized boundary at all
 EOF
 
   local before
@@ -148,7 +148,7 @@ EOF
   run_fix
   assert_eq 'should leave a no-safe-boundary line untouched (exit code reports residue)' "1" "$FIX_EXIT"
   assert_eq 'should leave a no-safe-boundary line untouched (file content byte-identical)' "$before" "$(cat "$FIXTURE")"
-  assert_contains 'should leave a no-safe-boundary line untouched (residue row)' "$FIX_OUT" '3:211:35'
+  assert_contains 'should leave a no-safe-boundary line untouched (residue row)' "$FIX_OUT" '3:446:75'
 }
 
 it_should_leave_a_fenced_code_block_untouched_even_with_an_over_cap_line_inside_it() {
@@ -211,7 +211,7 @@ it_should_make_no_further_changes_on_a_second_run_over_its_own_output() {
   cat > "$FIXTURE" <<'EOF'
 # AC8 fixture
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents. This second clause continues the thought after the boundary so the split can balance both halves reasonably well.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today. This second clause continues the thought after the boundary so the split can balance both halves reasonably well, again padded with a few more harmless extra words so the whole line clears the new prose cap comfortably while each half still stays safely under it.
 EOF
 
   run_fix
@@ -229,7 +229,7 @@ it_should_refuse_to_split_when_the_remainder_would_start_with_a_markdown_structu
   cat > "$FIXTURE" <<'EOF'
 # AC9 fixture
 
-Run the setup steps carefully before continuing on to the next stage of the deployment process today. - This looks exactly like the start of a bullet so the split must be rejected here
+Run the setup steps carefully before continuing on to the next stage of the deployment process today across every environment this team maintains right now, padding the sentence with a few more harmless words so its length clears the new five hundred and twelve character prose cap comfortably before the boundary point arrives. - This looks exactly like the start of a bullet so the split must be rejected here
 EOF
 
   local before
@@ -237,7 +237,7 @@ EOF
   run_fix
   assert_eq 'should refuse a structural-token remainder (exit code reports residue)' "1" "$FIX_EXIT"
   assert_eq 'should refuse a structural-token remainder (file content byte-identical)' "$before" "$(cat "$FIXTURE")"
-  assert_contains 'should refuse a structural-token remainder (residue row)' "$FIX_OUT" '3:184:34'
+  assert_contains 'should refuse a structural-token remainder (residue row)' "$FIX_OUT" '3:411:70'
 }
 
 it_should_repair_hits_at_many_line_numbers_in_one_invocation() {
@@ -245,15 +245,15 @@ it_should_repair_hits_at_many_line_numbers_in_one_invocation() {
   cat > "$FIXTURE" <<'EOF'
 # AC10 fixture
 
-Alpha sentence exists purely to push alpha's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file. Alpha continuation clause finishes the alpha thought after the boundary point here.
+Alpha sentence exists purely to push alpha's line length well past the five hundred and twelve character density cap enforced elsewhere on every prose line in this fixture file, padded with extra harmless words so it clears the new looser threshold. Alpha continuation clause finishes the alpha thought after the boundary point here, again padded with a few more extra words so the combined line comfortably clears the new five hundred and twelve character prose cap enforced on this line today.
 
 Short filler paragraph one.
 
-Beta sentence exists purely to push beta's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file. Beta continuation clause finishes the beta thought after the boundary point here.
+Beta sentence exists purely to push beta's line length well past the five hundred and twelve character density cap enforced elsewhere on every prose line in this fixture file, padded with extra harmless words so it clears the new looser threshold. Beta continuation clause finishes the beta thought after the boundary point here, again padded with a few more extra words so the combined line comfortably clears the new five hundred and twelve character prose cap enforced on this line today.
 
 Short filler paragraph two.
 
-Gamma sentence exists purely to push gamma's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file. Gamma continuation clause finishes the gamma thought after the boundary point here.
+Gamma sentence exists purely to push gamma's line length well past the five hundred and twelve character density cap enforced elsewhere on every prose line in this fixture file, padded with extra harmless words so it clears the new looser threshold. Gamma continuation clause finishes the gamma thought after the boundary point here, again padded with a few more extra words so the combined line comfortably clears the new five hundred and twelve character prose cap enforced on this line today.
 EOF
 
   run_fix
@@ -266,21 +266,21 @@ EOF
   cat > "$expected_file" <<'EOF'
 # AC10 fixture
 
-Alpha sentence exists purely to push alpha's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file.
+Alpha sentence exists purely to push alpha's line length well past the five hundred and twelve character density cap enforced elsewhere on every prose line in this fixture file, padded with extra harmless words so it clears the new looser threshold.
 
-Alpha continuation clause finishes the alpha thought after the boundary point here.
+Alpha continuation clause finishes the alpha thought after the boundary point here, again padded with a few more extra words so the combined line comfortably clears the new five hundred and twelve character prose cap enforced on this line today.
 
 Short filler paragraph one.
 
-Beta sentence exists purely to push beta's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file.
+Beta sentence exists purely to push beta's line length well past the five hundred and twelve character density cap enforced elsewhere on every prose line in this fixture file, padded with extra harmless words so it clears the new looser threshold.
 
-Beta continuation clause finishes the beta thought after the boundary point here.
+Beta continuation clause finishes the beta thought after the boundary point here, again padded with a few more extra words so the combined line comfortably clears the new five hundred and twelve character prose cap enforced on this line today.
 
 Short filler paragraph two.
 
-Gamma sentence exists purely to push gamma's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file.
+Gamma sentence exists purely to push gamma's line length well past the five hundred and twelve character density cap enforced elsewhere on every prose line in this fixture file, padded with extra harmless words so it clears the new looser threshold.
 
-Gamma continuation clause finishes the gamma thought after the boundary point here.
+Gamma continuation clause finishes the gamma thought after the boundary point here, again padded with a few more extra words so the combined line comfortably clears the new five hundred and twelve character prose cap enforced on this line today.
 EOF
   local expected
   expected="$(cat "$expected_file")"
@@ -305,6 +305,24 @@ EOF
   assert_eq 'should leave an already-clean file unchanged (file content byte-identical)' "$before" "$(cat "$FIXTURE")"
 }
 
+it_should_leave_a_prose_paragraph_between_the_bullet_and_prose_caps_unchanged_and_exit_0() {
+  new_fixture prose-between-caps.md
+  cat > "$FIXTURE" <<'EOF'
+# Between-caps fixture
+
+This paragraph sits comfortably between the two density caps this repository now enforces, long enough to clear the old two hundred and fifty six character bullet cap by a wide margin yet still well short of the five hundred and twelve character prose cap that governs a plain line like this one.
+EOF
+
+  local before
+  before="$(cat "$FIXTURE")"
+  run_fix
+  assert_eq 'should leave a prose paragraph between the bullet and prose caps unchanged (exit code)' "0" "$FIX_EXIT"
+  assert_eq 'should leave a prose paragraph between the bullet and prose caps unchanged (file content byte-identical, no split invented for a line only a bullet cap would have flagged)' "$before" "$(cat "$FIXTURE")"
+
+  run_density_check
+  assert_eq 'should leave a prose paragraph between the bullet and prose caps unchanged (independently re-verified clean by check-density.sh)' "0" "$DENSITY_EXIT"
+}
+
 it_should_exit_2_when_given_a_missing_file() {
   FIXTURE="$work_dir/does-not-exist.md"
   run_fix
@@ -323,7 +341,7 @@ it_should_leave_an_over_cap_line_untouched_when_an_unclosed_bracket_precedes_the
   cat > "$FIXTURE" <<'EOF'
 # AC12 fixture
 
-Check [the reference material without a closing bracket anywhere before the sentence boundary point right here. This continuation clause exists solely to push total length well past caps enforced elsewhere in this fixture for the test scenario at hand today truly indeed
+Check [the reference material without a closing bracket anywhere before the sentence boundary point right here, padded with a few more harmless words so the whole line clears the new five hundred and twelve character prose cap comfortably before reaching that unclosed bracket. This continuation clause exists solely to push total length well past caps enforced elsewhere in this fixture for the test scenario at hand today truly indeed
 EOF
 
   local before
@@ -331,7 +349,7 @@ EOF
   run_fix
   assert_eq 'should leave an unclosed-bracket line untouched (exit code reports residue)' "1" "$FIX_EXIT"
   assert_eq 'should leave an unclosed-bracket line untouched (file content byte-identical)' "$before" "$(cat "$FIXTURE")"
-  assert_contains 'should leave an unclosed-bracket line untouched (residue row)' "$FIX_OUT" '3:269:42'
+  assert_contains 'should leave an unclosed-bracket line untouched (residue row)' "$FIX_OUT" '3:435:69'
 }
 
 it_should_leave_an_over_cap_line_untouched_when_its_only_boundary_sits_inside_a_code_span() {
@@ -339,7 +357,7 @@ it_should_leave_an_over_cap_line_untouched_when_its_only_boundary_sits_inside_a_
   cat > "$FIXTURE" <<'EOF'
 # AC13 fixture
 
-Run the `first step of setup. Then continue with the configuration` before moving further along in this particularly long winded deployment procedure that keeps dragging on for quite some time here today certainly for sure absolutely without any doubt whatsoever really
+Run the `first step of setup. Then continue with the configuration` before moving further along in this particularly long winded deployment procedure that keeps dragging on for quite some time here today certainly for sure absolutely without any doubt whatsoever really, padded further still with extra harmless words purely so the whole line clears the new five hundred and twelve character prose density cap comfortably for this test
 EOF
 
   local before
@@ -347,7 +365,7 @@ EOF
   run_fix
   assert_eq 'should leave a code-span-boundary line untouched (exit code reports residue)' "1" "$FIX_EXIT"
   assert_eq 'should leave a code-span-boundary line untouched (file content byte-identical)' "$before" "$(cat "$FIXTURE")"
-  assert_contains 'should leave a code-span-boundary line untouched (residue row)' "$FIX_OUT" '3:269:41'
+  assert_contains 'should leave a code-span-boundary line untouched (residue row)' "$FIX_OUT" '3:435:68'
 }
 
 it_should_leave_an_over_cap_line_untouched_when_its_only_semicolon_boundary_sits_inside_parentheses() {
@@ -355,7 +373,7 @@ it_should_leave_an_over_cap_line_untouched_when_its_only_semicolon_boundary_sits
   cat > "$FIXTURE" <<'EOF'
 # AC14 fixture
 
-This bullet point wraps up nicely and cannot possibly reach the cap easily today (structurally this cannot ever reach zero completely; reports stay capped every run and simply never gate anything at all around here).
+This bullet point wraps up nicely and cannot possibly reach the cap easily today (structurally this cannot ever reach zero completely; reports stay capped every run and simply never gate anything at all around here even after padding the whole sentence with a good deal more harmless filler words so it clears the new five hundred and twelve character prose density cap comfortably for this particular test scenario today).
 EOF
 
   local before
@@ -363,7 +381,7 @@ EOF
   run_fix
   assert_eq 'should leave a semicolon-in-parens line untouched (exit code reports residue)' "1" "$FIX_EXIT"
   assert_eq 'should leave a semicolon-in-parens line untouched (file content byte-identical)' "$before" "$(cat "$FIXTURE")"
-  assert_contains 'should leave a semicolon-in-parens line untouched (residue row)' "$FIX_OUT" '3:216:35'
+  assert_contains 'should leave a semicolon-in-parens line untouched (residue row)' "$FIX_OUT" '3:423:69'
 }
 
 it_should_refuse_to_split_a_paragraph_whose_only_boundary_is_a_semicolon_and_report_it_as_residue() {
@@ -371,7 +389,7 @@ it_should_refuse_to_split_a_paragraph_whose_only_boundary_is_a_semicolon_and_rep
   cat > "$FIXTURE" <<'EOF'
 # Semicolon-only paragraph fixture
 
-This first independent clause exists purely to push the overall line length well past the two hundred fifty six character density cap enforced here today for sure absolutely; this second clause continues the thought cleanly right after the semicolon boundary point without any issue.
+This first independent clause exists purely to push the overall line length well past the five hundred and twelve character density cap enforced here today for sure absolutely, padded with a good deal more harmless filler words so it clears the new looser prose threshold comfortably and reliably every single time; this second clause continues the thought cleanly right after the semicolon boundary point without any issue whatsoever today for this particular fixture scenario.
 EOF
 
   local before
@@ -379,7 +397,7 @@ EOF
   run_fix
   assert_eq 'should refuse to split a paragraph whose only boundary is a semicolon (exit code reports residue)' "1" "$FIX_EXIT"
   assert_eq 'should refuse to split a paragraph whose only boundary is a semicolon (file content byte-identical, no second paragraph opening mid-sentence)' "$before" "$(cat "$FIXTURE")"
-  assert_contains 'should refuse to split a paragraph whose only boundary is a semicolon (residue row)' "$FIX_OUT" '3:283:44'
+  assert_contains 'should refuse to split a paragraph whose only boundary is a semicolon (residue row)' "$FIX_OUT" '3:478:74'
 }
 
 it_should_split_an_over_cap_bullet_at_a_semicolon_boundary_outside_any_brackets_and_stay_idempotent_on_a_second_run() {
@@ -419,7 +437,7 @@ it_should_resolve_an_untracked_files_violation_with_changed_only_matching_the_no
   cat > "$REPO_DIR/$FIXTURE" <<'EOF'
 # AC4 fixture
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents. This second clause continues the thought after the boundary so the split can balance both halves reasonably well.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today. This second clause continues the thought after the boundary so the split can balance both halves reasonably well, again padded with a few more harmless extra words so the whole line clears the new prose cap comfortably while each half still stays safely under it.
 EOF
 
   run_fix_changed_only
@@ -430,9 +448,9 @@ EOF
   cat > "$expected_file" <<'EOF'
 # AC4 fixture
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today.
 
-This second clause continues the thought after the boundary so the split can balance both halves reasonably well.
+This second clause continues the thought after the boundary so the split can balance both halves reasonably well, again padded with a few more harmless extra words so the whole line clears the new prose cap comfortably while each half still stays safely under it.
 EOF
   local expected
   expected="$(cat "$expected_file")"
@@ -452,14 +470,14 @@ it_should_split_only_a_newly_added_violation_and_leave_a_pre_existing_violation_
   cat > "$REPO_DIR/$FIXTURE" <<'EOF'
 # Selective fixture
 
-This line deliberately avoids every recognized split boundary so the fixer has nowhere safe to break it and must leave it fully untouched while reporting it as residue instead of mutating anything inside it here
+This line deliberately avoids every recognized split boundary so the fixer has nowhere safe to break it and must leave it fully untouched while reporting it as residue instead of mutating anything inside it here today no matter how far past the new five hundred and twelve character prose density cap its overall length happens to stretch on this single unbroken run-on sentence with no period no semicolon and no other recognized boundary at all
 EOF
   git -C "$REPO_DIR" add "$FIXTURE"
   git -C "$REPO_DIR" commit -q -m base
 
   cat >> "$REPO_DIR/$FIXTURE" <<'EOF'
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents. This second clause continues the thought after the boundary so the split can balance both halves reasonably well.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today. This second clause continues the thought after the boundary so the split can balance both halves reasonably well, again padded with a few more harmless extra words so the whole line clears the new prose cap comfortably while each half still stays safely under it.
 EOF
 
   local pre_existing_line
@@ -475,9 +493,9 @@ EOF
 
 $pre_existing_line
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today.
 
-This second clause continues the thought after the boundary so the split can balance both halves reasonably well.
+This second clause continues the thought after the boundary so the split can balance both halves reasonably well, again padded with a few more harmless extra words so the whole line clears the new prose cap comfortably while each half still stays safely under it.
 EOF
   local expected
   expected="$(cat "$expected_file")"
@@ -499,7 +517,7 @@ EOF
   cat > "$REPO_DIR/$FIXTURE" <<'EOF'
 # Convergence fixture
 
-Alpha sentence exists purely to push alpha's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file. Beta sentence exists purely to push beta's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file. Gamma sentence continues the thought after the second boundary point right here today.
+Alpha sentence exists purely to push alpha's line length well past the five hundred and twelve character density cap enforced elsewhere in this fixture file, stretching across many additional words so the total count clears the new looser prose threshold comfortably here today for this whole scenario. Beta sentence exists purely to push beta's line length well past the five hundred and twelve character density cap enforced elsewhere in this fixture file, stretching across many additional words so the total count clears the new looser prose threshold comfortably here today for this whole scenario. Gamma sentence continues the thought after the second boundary point right here today for this whole convergence test scenario, adding a good deal more words so it clears the prose threshold on its own as well without any trouble whatsoever.
 EOF
 
   run_fix_changed_only
@@ -510,11 +528,11 @@ EOF
   cat > "$expected_file" <<'EOF'
 # Convergence fixture
 
-Alpha sentence exists purely to push alpha's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file.
+Alpha sentence exists purely to push alpha's line length well past the five hundred and twelve character density cap enforced elsewhere in this fixture file, stretching across many additional words so the total count clears the new looser prose threshold comfortably here today for this whole scenario.
 
-Beta sentence exists purely to push beta's line length well past the two hundred and fifty six character density cap enforced elsewhere in this fixture file.
+Beta sentence exists purely to push beta's line length well past the five hundred and twelve character density cap enforced elsewhere in this fixture file, stretching across many additional words so the total count clears the new looser prose threshold comfortably here today for this whole scenario.
 
-Gamma sentence continues the thought after the second boundary point right here today.
+Gamma sentence continues the thought after the second boundary point right here today for this whole convergence test scenario, adding a good deal more words so it clears the prose threshold on its own as well without any trouble whatsoever.
 EOF
   local expected
   expected="$(cat "$expected_file")"
@@ -610,7 +628,7 @@ it_should_split_at_the_same_sentence_boundary_when_a_semicolon_also_appears_late
   cat > "$FIXTURE" <<'EOF'
 # AC16 fixture
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents. This second clause continues the thought after the boundary so the split can balance both halves; yes indeed for sure certainly absolutely today.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today. This second clause continues the thought after the boundary so the split can balance both halves; yes indeed for sure certainly absolutely today.
 EOF
 
   run_fix
@@ -623,7 +641,7 @@ EOF
   cat > "$expected_file" <<'EOF'
 # AC16 fixture
 
-This clause exists purely to push the line length well past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents.
+This clause exists purely to push the line length well past the five hundred and twelve character density cap that check-density.sh now enforces on every prose line lacking a bullet marker across this repository's markdown documentation, using extra padding words solely to lengthen it convincingly without changing its meaning in any material way today.
 
 This second clause continues the thought after the boundary so the split can balance both halves; yes indeed for sure certainly absolutely today.
 EOF
@@ -755,7 +773,7 @@ it_should_refuse_to_split_a_blockquote_line_and_report_it_as_residue() {
   cat > "$FIXTURE" <<'EOF'
 # Blockquote fixture
 
-> This clause exists to push the line length past the two hundred and fifty six character density cap that check-density.sh enforces on every prose line in this repository's markdown documents. This second clause continues the thought after the boundary so the split can balance both halves reasonably well.
+> This clause exists to push the line length past the five hundred and twelve character density cap that check-density.sh enforces on every prose line in this repository's markdown documents, padded with a good deal more harmless filler words so it clears the new looser prose threshold comfortably today. This second clause continues the thought after the boundary so the split can balance both halves reasonably well, padded once more so the whole quoted line clears the new cap with room to spare.
 EOF
 
   local before
@@ -763,7 +781,7 @@ EOF
   run_fix
   assert_eq 'should refuse to split a blockquote line (exit code reports residue)' "1" "$FIX_EXIT"
   assert_eq 'should refuse to split a blockquote line (file content byte-identical, the quote never broken by an inserted blank line)' "$before" "$(cat "$FIXTURE")"
-  assert_contains 'should refuse to split a blockquote line (residue row)' "$FIX_OUT" '3:307:49'
+  assert_contains 'should refuse to split a blockquote line (residue row)' "$FIX_OUT" '3:500:83'
 }
 
 it_should_refuse_to_split_an_over_cap_heading_and_report_it_as_residue() {
@@ -771,7 +789,7 @@ it_should_refuse_to_split_an_over_cap_heading_and_report_it_as_residue() {
   cat > "$FIXTURE" <<'EOF'
 # Heading fixture
 
-### How the harness normalizes a non-deterministic captured value such as a duration. Every one of them passes through one single shared mask set before any comparison between the expected and actual output happens.
+### How the harness normalizes a non-deterministic captured value such as a duration, a randomly generated identifier, or a timestamp so that two otherwise-equivalent runs of the exact same scenario never diverge on those particular fields no matter how many times the whole suite gets rerun back to back on this machine or any other one. Every one of them passes through one single shared mask set before any comparison between the expected and actual output happens.
 
 Body text.
 EOF
@@ -781,7 +799,7 @@ EOF
   run_fix
   assert_eq 'should refuse to split an over-cap heading (exit code reports residue)' "1" "$FIX_EXIT"
   assert_eq 'should refuse to split an over-cap heading (file content byte-identical, the heading text never severed into body prose below it)' "$before" "$(cat "$FIXTURE")"
-  assert_contains 'should refuse to split an over-cap heading (residue row)' "$FIX_OUT" '3:215:34'
+  assert_contains 'should refuse to split an over-cap heading (residue row)' "$FIX_OUT" '3:468:77'
 }
 
 it_should_split_an_over_cap_line_at_a_sentence_boundary_with_both_halves_under_the_caps
@@ -800,6 +818,7 @@ it_should_make_no_further_changes_on_a_second_run_over_its_own_output
 it_should_refuse_to_split_when_the_remainder_would_start_with_a_markdown_structural_token_and_report_residue
 it_should_repair_hits_at_many_line_numbers_in_one_invocation
 it_should_leave_an_already_clean_file_unchanged_and_exit_0
+it_should_leave_a_prose_paragraph_between_the_bullet_and_prose_caps_unchanged_and_exit_0
 it_should_exit_2_when_given_a_missing_file
 it_should_exit_2_when_given_an_unknown_flag
 it_should_leave_an_over_cap_line_untouched_when_an_unclosed_bracket_precedes_the_only_boundary

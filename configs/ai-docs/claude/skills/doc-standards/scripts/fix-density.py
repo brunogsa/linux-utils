@@ -8,6 +8,14 @@ Never reimplements check-bullet-gap.py's or check-density.sh's skip logic
 out to both and only acts on the lines they report as violations, so the two
 checkers stay the single source of truth for what counts as "prose" here.
 
+Two caps, chosen by line shape, mirroring check-density.sh's own two tiers:
+  prose line (no bullet marker):  512 chars / 64 words (--max-chars/--max-words)
+  bullet/sub-bullet/ordered line: 256 chars / 32 words (--bullet-chars/--bullet-words)
+Both the subprocess call to check-density.sh and this script's own
+candidate-split scoring select the cap pair the same way check-density.sh's
+awk program does - by BULLET_MARKER, so the two never disagree on which
+lines are bullets.
+
 Both halves of a split are emitted as their own rendered element: a
 bullet's second half becomes an indented sub-bullet, a paragraph's becomes
 a second paragraph separated by a blank line. Neither may be a bare
@@ -61,7 +69,8 @@ that leaves one half still over cap gets a further pass at splitting that
 half again on the next iteration.
 
 Usage:
-  fix-density.py [--max-chars N] [--max-words N] [--changed-only] <file> [<file>...]
+  fix-density.py [--max-chars N] [--max-words N] [--bullet-chars N]
+    [--bullet-words N] [--changed-only] <file> [<file>...]
 
 --changed-only relays straight through to both inner scripts' own
 --changed-only flag (check-density.sh and check-bullet-gap.py) - it
@@ -88,13 +97,20 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 BULLET_GAP_SCRIPT = SCRIPT_DIR / "check-bullet-gap.py"
 DENSITY_SCRIPT = SCRIPT_DIR / "check-density.sh"
 
-MAX_CHARS = 256
-MAX_WORDS = 32
+PROSE_MAX_CHARS = 512
+PROSE_MAX_WORDS = 64
+BULLET_MAX_CHARS = 256
+BULLET_MAX_WORDS = 32
 MAX_ITERATIONS = 10
 
 BOUNDARY = re.compile(r"\. | — | -- |; ")
 STRUCTURAL_TOKEN = re.compile(r"^(?:[-*+#|>]|\d+\.)")
-BULLET_MARKER = re.compile(r"^([ \t]*)([-*+] |\d+\. )")
+
+# Trailing "[ \t]" mirrors check-density.sh's awk bullet test
+# ("^[[:space:]]*([-*+]|[0-9]+\.)[[:space:]]"), which treats a
+# tab after the marker as a bullet too, so the fixer and
+# checker agree on which lines take the bullet cap.
+BULLET_MARKER = re.compile(r"^([ \t]*)([-*+][ \t]|\d+\.[ \t])")
 BLOCKQUOTE = re.compile(r"^[ \t]*>")
 HEADING = re.compile(r"^[ \t]*#{1,6} ")
 
@@ -115,6 +131,16 @@ def measure(text):
     s = DATA_URI.sub("", s)
     s = s.replace("[", "").replace("]", "")
     return len(s), len(s.split())
+
+
+def caps_for_line(line, prose_chars, prose_words, bullet_chars, bullet_words):
+    """The (chars, words) cap pair `line` is measured against - the bullet
+    pair when `line` matches BULLET_MARKER (the same shape check-density.sh's
+    own is_bullet test uses), the prose pair otherwise. Classifies on the raw
+    line, before measure()'s strips, matching check-density.sh's own order."""
+    if BULLET_MARKER.match(line):
+        return bullet_chars, bullet_words
+    return prose_chars, prose_words
 
 
 def is_first_half_balanced(first_half):
@@ -223,8 +249,15 @@ def split_line(line, max_chars, max_words):
     return [first, "", second]
 
 
-def get_density_hits(path, max_chars, max_words, changed_only):
+def get_density_hits(
+    path, prose_chars, prose_words, bullet_chars, bullet_words, changed_only
+):
     """Parse check-density.sh's <line>:<chars>:<words> rows for one file.
+
+    Passes both cap pairs through as check-density.sh's own
+    --max-chars/--max-words (prose) and --bullet-chars/--bullet-words
+    (bullet), so the subprocess and this script's own split-candidate
+    scoring always agree on what counts as over-cap.
 
     Raises RuntimeError, naming `path`, when check-density.sh itself exits
     outside {0, 1} - e.g. 2, a usage or --changed-only scoping error (a
@@ -233,9 +266,13 @@ def get_density_hits(path, max_chars, max_words, changed_only):
     args = [
         str(DENSITY_SCRIPT),
         "--max-chars",
-        str(max_chars),
+        str(prose_chars),
         "--max-words",
-        str(max_words),
+        str(prose_words),
+        "--bullet-chars",
+        str(bullet_chars),
+        "--bullet-words",
+        str(bullet_words),
     ]
     if changed_only:
         args.append("--changed-only")
@@ -254,15 +291,21 @@ def get_density_hits(path, max_chars, max_words, changed_only):
     return hits
 
 
-def split_pass(path, max_chars, max_words, changed_only):
+def split_pass(path, prose_chars, prose_words, bullet_chars, bullet_words, changed_only):
     """One bottom-to-top split pass over the file's current density hits.
 
     Bottom-to-top means an earlier (higher-line-number) insertion never
     shifts the still-queued line numbers of hits below it - the same
     guarantee check-bullet-gap.py's fix() relies on - so a single pass over
     one density-check's hit list is always enough per pass.
+
+    Each hit line picks its own cap pair via caps_for_line - a prose hit
+    and a bullet hit in the same file are never measured against the
+    same caps.
     """
-    hits = get_density_hits(path, max_chars, max_words, changed_only)
+    hits = get_density_hits(
+        path, prose_chars, prose_words, bullet_chars, bullet_words, changed_only
+    )
     if not hits:
         return [], False
 
@@ -274,7 +317,11 @@ def split_pass(path, max_chars, max_words, changed_only):
     changed = False
     residue = []
     for line_no, chars, words in sorted(hits, reverse=True):
-        replacement = split_line(lines[line_no - 1], max_chars, max_words)
+        line = lines[line_no - 1]
+        max_chars, max_words = caps_for_line(
+            line, prose_chars, prose_words, bullet_chars, bullet_words
+        )
+        replacement = split_line(line, max_chars, max_words)
         if replacement is None:
             residue.append((line_no, chars, words))
             continue
@@ -288,11 +335,15 @@ def split_pass(path, max_chars, max_words, changed_only):
     return residue, changed
 
 
-def converge(path, max_chars, max_words, changed_only):
+def converge(path, prose_chars, prose_words, bullet_chars, bullet_words, changed_only):
     """Alternate bullet-gap --fix and a split pass until a pass changes
     nothing, capped at MAX_ITERATIONS - see the module docstring for why a
     single split pass isn't always enough (a freshly split half can still
     be over cap and need its own further split on the next pass).
+
+    check-bullet-gap.py has no bullet/prose distinction of its own - it only
+    ever measures bullets - so it gets the bullet cap pair as its own
+    --max-chars/--max-words, never the prose pair.
 
     changed_only is re-relayed to both inner scripts on every iteration,
     not just the first - get-changed-lines.sh recomputes its changed-vs-HEAD
@@ -306,9 +357,9 @@ def converge(path, max_chars, max_words, changed_only):
         str(BULLET_GAP_SCRIPT),
         "--fix",
         "--max-chars",
-        str(max_chars),
+        str(bullet_chars),
         "--max-words",
-        str(max_words),
+        str(bullet_words),
     ]
     if changed_only:
         bullet_gap_args.append("--changed-only")
@@ -324,7 +375,9 @@ def converge(path, max_chars, max_words, changed_only):
                 f"fix-density.py: check-bullet-gap.py --fix failed for "
                 f"{path}: {bullet_gap_result.stderr.strip()}"
             )
-        residue, _ = split_pass(path, max_chars, max_words, changed_only)
+        residue, _ = split_pass(
+            path, prose_chars, prose_words, bullet_chars, bullet_words, changed_only
+        )
 
         with open(path, encoding="utf-8") as fh:
             current_content = fh.read()
@@ -340,7 +393,8 @@ def converge(path, max_chars, max_words, changed_only):
 
 
 def main(argv):
-    max_chars, max_words = MAX_CHARS, MAX_WORDS
+    prose_chars, prose_words = PROSE_MAX_CHARS, PROSE_MAX_WORDS
+    bullet_chars, bullet_words = BULLET_MAX_CHARS, BULLET_MAX_WORDS
     changed_only = False
     files = []
 
@@ -348,10 +402,16 @@ def main(argv):
     while i < len(argv):
         arg = argv[i]
         if arg == "--max-chars":
-            max_chars = int(argv[i + 1])
+            prose_chars = int(argv[i + 1])
             i += 2
         elif arg == "--max-words":
-            max_words = int(argv[i + 1])
+            prose_words = int(argv[i + 1])
+            i += 2
+        elif arg == "--bullet-chars":
+            bullet_chars = int(argv[i + 1])
+            i += 2
+        elif arg == "--bullet-words":
+            bullet_words = int(argv[i + 1])
             i += 2
         elif arg == "--changed-only":
             changed_only = True
@@ -369,7 +429,7 @@ def main(argv):
     if not files:
         print(
             "usage: fix-density.py [--max-chars N] [--max-words N] "
-            "[--changed-only] <file>...",
+            "[--bullet-chars N] [--bullet-words N] [--changed-only] <file>...",
             file=sys.stderr,
         )
         return 2
@@ -377,7 +437,9 @@ def main(argv):
     total_residue = 0
     for path in files:
         try:
-            residue = converge(path, max_chars, max_words, changed_only)
+            residue = converge(
+                path, prose_chars, prose_words, bullet_chars, bullet_words, changed_only
+            )
         except OSError as err:
             print(f"cannot read {path}: {err}", file=sys.stderr)
             return 2
