@@ -327,7 +327,7 @@
     "bash-language-server@claude-code-lsps": true,
     "terraform-ls@claude-code-lsps": true,
     "security-guidance@claude-plugins-official": true,
-    "explanatory-output-style@claude-plugins-official": true,
+    "explanatory-output-style@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": false,
