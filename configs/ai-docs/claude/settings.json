@@ -6,10 +6,10 @@
     "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS": "16",
     "CLAUDE_CODE_FORK_SUBAGENT": "1",
     "CLAUDE_CODE_RETRY_WATCHDOG": "1",
-    "CLAUDE_ENABLE_STREAM_WATCHDOG": "1"
+    "CLAUDE_ENABLE_STREAM_WATCHDOG": "1",
+    "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
   },
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "allow": [
       "Read",
       "Edit(//tmp/**)",
@@ -123,7 +123,8 @@
       "Read(~/.pypirc)",
       "Read(~/.docker/config.json)",
       "Read(~/.config/gh/**)"
-    ]
+    ],
+    "defaultMode": "bypassPermissions"
   },
   "model": "sonnet",
   "skillOverrides": {
@@ -361,7 +362,16 @@
       "autoUpdate": true
     }
   },
-  "effortLevel": "high",
+  "feedbackDrafts": "off",
+  "effortLevel": "medium",
+  "modelSettings": {
+    "claude-opus-5": {
+      "effortLevel": "high"
+    },
+    "claude-sonnet-5": {
+      "effortLevel": "medium"
+    }
+  },
   "advisorModel": "opus",
   "promptSuggestionEnabled": true,
   "autoUpdatesChannel": "latest",
