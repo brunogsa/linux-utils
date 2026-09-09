@@ -68,32 +68,22 @@ Per comment field, once fetched and filtered: id, author, body, path, line, diff
 
 Inline comments carry one more: `thread_id`, the enclosing thread's `PRRT_...` node id from 3a. Every comment flattened out of the same thread repeats it.
 
-- Semantic-cluster: group comments addressing one logical change. Same-file
-  is a hint, not a rule; cross-file comments can share a cluster.
-- Rank: severity (CHANGES_REQUESTED > general > nit) → cluster size → file
-  recency (most recent first).
+- Semantic-cluster: group comments addressing one logical change. Same-file is a hint, not a rule; cross-file comments can share a cluster.
+- Rank: severity (CHANGES_REQUESTED > general > nit) → cluster size → file recency (most recent first).
 - Default action per cluster:
-  - `answer` if every comment is a question (ends in "?", or starts with
-    why/what/how/when/could/would/should/can/is/are/does, no actionable
-    request).
+  - `answer` if every comment is a question (ends in "?", or starts with why/what/how/when/could/would/should/can/is/are/does, no actionable request).
   - `apply` otherwise.
   - Never default to `drop` — that's always an explicit user choice.
 
-- Per cluster, propose a one-line drop reason — honest and specific (not
-  "out of scope").
+- Per cluster, propose a one-line drop reason — honest and specific (not "out of scope").
 
-- For `apply` clusters, synthesize a one-line **Planned change** — the
-  concrete edit that resolves the self-flagged `AI:` note. Paraphrase or
-  quote that note's own wording; don't invent scope it didn't state.
-  `apply` alone doesn't tell the user what will actually change, and the
-  note already named the promised fix — surface it instead of making them
-  re-read the thread to find it.
+- For `apply` clusters, synthesize a one-line **Planned change** — the concrete edit that resolves the self-flagged `AI:` note. Paraphrase or quote that note's own wording; don't invent scope it didn't state.
+
+  `apply` alone doesn't tell the user what will actually change, and the note already named the promised fix — surface it instead of making them re-read the thread to find it.
 
 ### 3g. Emit the proposal block
 
-Return this single block as your final message — one `### Cluster N` section per cluster, nothing else. Main never shows this to the user as text: it
-parses each section into one `AskUserQuestion` question (SKILL.md's "Output: cluster decisions via AskUserQuestion"), so every field below must stay filled in and unambiguous — main has no way
-to ask you a follow-up.
+Return this single block as your final message — one `### Cluster N` section per cluster, nothing else. Main never shows this to the user as text: it parses each section into one `AskUserQuestion` question (SKILL.md's "Output: cluster decisions via AskUserQuestion"), so every field below must stay filled in and unambiguous — main has no way to ask you a follow-up.
 
 ```
 ## PR <n> — <total> candidate comments in <K> clusters
