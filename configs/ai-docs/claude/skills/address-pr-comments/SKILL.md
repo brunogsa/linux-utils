@@ -20,9 +20,10 @@ disable-model-invocation: false
 
 **Ownership** (what `by` matches) is the author of an inline thread's **first comment** (replies never transfer it), of a top-level comment, or of a review for its summary body. Rationale: `references/reply-patterns.md`.
 
-**Self-TODO gate (always applied, never a filter you pass):** an item is a candidate only if unresolved AND you (`ME`) already replied with `TODO:` somewhere in it —
-mirroring your own review workflow, where you triage reviewer comments by hand and leave a `TODO: ...` marking a promised follow-up. The skill executes those follow-ups; it never
-replies to fresh, untriaged comments on your behalf. Full rule: `references/fetch-cluster-propose.md#3d-self-todo-gate-always-applied-before-user-filters`.
+**Self-AI gate (always applied, never a filter you pass):** an item is a candidate only if unresolved AND you (`ME`) already replied with `AI:` somewhere in it —
+mirroring your own review workflow, where you triage reviewer comments by hand and leave an `AI: ...` marking a promised follow-up. The marker says `AI:` rather than `TODO:` so a
+human scanning the thread reads it as a note addressed to your AI, not to them. The skill executes those follow-ups; it never replies to fresh, untriaged comments on your behalf.
+Full rule: `references/fetch-cluster-propose.md#3d-self-ai-gate-always-applied-before-user-filters`.
 
 Examples: `/address-pr-comments 169`, `/address-pr-comments 169 by alice`, `/address-pr-comments 169 by alice, bob in src/auth`.
 

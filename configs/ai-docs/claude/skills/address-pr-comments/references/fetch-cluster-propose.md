@@ -28,18 +28,18 @@ gh api repos/$OWNER_REPO/pulls/<n>/reviews
 
 Include each review's `body` (when non-empty) plus its `state` (`APPROVED` / `CHANGES_REQUESTED` / `COMMENTED`) — `state` feeds the rank rule below.
 
-### 3d. Self-TODO gate (always applied, before user filters)
+### 3d. Self-AI gate (always applied, before user filters)
 
 A candidate item — inline thread, top-level comment, or review-summary body — proceeds only if BOTH hold:
 
 - **Not resolved.** Inline threads: `isResolved == false` (already required by 3a). Top-level comments and review-summary bodies have no resolved concept (3b/3c), so this half is automatically satisfied for them.
-- **Self-flagged.** At least one comment in the item is authored by `ME` (`is_self == true`) and its body contains `TODO:` (case-insensitive substring match).
+- **Self-flagged.** At least one comment in the item is authored by `ME` (`is_self == true`) and its body has a line whose first non-blank, non-list-marker token is `AI:` (case-insensitive).
 
 Drop anything failing either check — silently, before clustering.
 
 It's not a "dropped cluster" (no reply owed, no cluster entry at all): it's out of scope because you haven't yet triaged it into a promised follow-up.
 
-This is why a bot's own review-summary boilerplate ("I left N suggestions below") never survives this gate: `ME` never replies inside it, so it has no self-flagged TODO.
+This is why a bot's own review-summary boilerplate ("I left N suggestions below") never survives this gate: `ME` never replies inside it, so it has no self-flagged `AI:` note.
 
 That holds regardless of how many of its inline suggestions are still open.
 
@@ -83,10 +83,10 @@ Inline comments carry one more: `thread_id`, the enclosing thread's `PRRT_...` n
   "out of scope").
 
 - For `apply` clusters, synthesize a one-line **Planned change** — the
-  concrete edit that resolves the self-flagged TODO. Paraphrase or quote
-  the TODO's own wording; don't invent scope it didn't state. `apply`
-  alone doesn't tell the user what will actually change, and the TODO
-  already named the promised fix — surface it instead of making them
+  concrete edit that resolves the self-flagged `AI:` note. Paraphrase or
+  quote that note's own wording; don't invent scope it didn't state.
+  `apply` alone doesn't tell the user what will actually change, and the
+  note already named the promised fix — surface it instead of making them
   re-read the thread to find it.
 
 ### 3g. Emit the proposal block
@@ -101,11 +101,11 @@ to ask you a follow-up.
 ### Cluster 1: <short title> [action: apply]
 - Files: src/auth/login.ts, src/auth/session.ts
 - Threads: PRRT_kwDOAbc123, PRRT_kwDOAbc456
-- Planned change: <one-line synthesis of the TODO's promised fix>
+- Planned change: <one-line synthesis of the `AI:` note's promised fix>
 - Comments:
   - [c12345] (alice) src/auth/login.ts:42 — "the rate limit should also..."
     <url>
-  - [c12389] (yours) src/auth/login.ts:44 — "TODO: <what you promised to fix>"
+  - [c12389] (yours) src/auth/login.ts:44 — "AI: <what you promised to fix>"
     <url>
 - Proposed drop reason (if flipped): rate-limit lives in the gateway, not the app
 ```
